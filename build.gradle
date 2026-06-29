@@ -14,6 +14,20 @@ allprojects {
     version = rootProject.mod_version
 }
 
+tasks.register('buildAllPlatformsRelease', Sync) {
+    group = 'build'
+    description = 'Builds Fabric and NeoForge release jars into .releases.'
+    dependsOn ':fabric:remapJar', ':neoforge:remapJar'
+
+    def releaseDirectory = layout.projectDirectory.dir('.releases')
+    def fabricJar = project(':fabric').tasks.named('remapJar').flatMap { it.archiveFile }
+    def neoForgeJar = project(':neoforge').tasks.named('remapJar').flatMap { it.archiveFile }
+
+    into releaseDirectory
+    from(fabricJar)
+    from(neoForgeJar)
+}
+
 subprojects {
     apply plugin: 'dev.architectury.loom'
     apply plugin: 'architectury-plugin'
