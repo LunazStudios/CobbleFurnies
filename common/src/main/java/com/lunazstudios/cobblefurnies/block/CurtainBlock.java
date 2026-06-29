@@ -135,21 +135,27 @@ public class CurtainBlock extends HorizontalDirectionalBlock {
 
         CurtainHorizontalPart horizontal = getCurtainHorizontalType(topState, level, topPos);
 
-        BlockState bottomState = defaultBlockState()
-                .setValue(FACING, facing)
-                .setValue(VERTICAL, CurtainVerticalPart.BOTTOM)
-                .setValue(OPEN, false)
-                .setValue(HINGE, hinge)
-                .setValue(HORIZONTAL, horizontal);
-        level.setBlock(bottomPos, bottomState, 3);
-
         return topState.setValue(HORIZONTAL, horizontal);
     }
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        if (level.isClientSide) return;
+
         Direction facing = state.getValue(FACING);
         CurtainVerticalPart vertical = state.getValue(VERTICAL);
+        DoorHingeSide hinge = state.getValue(HINGE);
+
+        if (vertical == CurtainVerticalPart.TOP) {
+            BlockPos bottomPos = pos.below();
+            BlockState bottomState = defaultBlockState()
+                    .setValue(FACING, facing)
+                    .setValue(VERTICAL, CurtainVerticalPart.BOTTOM)
+                    .setValue(OPEN, state.getValue(OPEN))
+                    .setValue(HINGE, hinge);
+
+            level.setBlock(bottomPos, bottomState.setValue(HORIZONTAL, getCurtainHorizontalType(bottomState, level, bottomPos)), 3);
+        }
 
         level.setBlock(pos, state.setValue(HORIZONTAL, getCurtainHorizontalType(state, level, pos)), 3);
 

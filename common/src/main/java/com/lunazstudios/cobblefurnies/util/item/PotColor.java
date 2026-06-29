@@ -5,6 +5,7 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.function.Supplier;
 
 public enum PotColor implements StringRepresentable {
@@ -28,7 +29,7 @@ public enum PotColor implements StringRepresentable {
 
     @Override
     public String getSerializedName() {
-        return name().toLowerCase();
+        return name().toLowerCase(Locale.ROOT);
     }
 
     public static @Nullable PotColor fromItem(Item item) {

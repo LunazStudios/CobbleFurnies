@@ -60,6 +60,10 @@ dependencies {
     modImplementation "com.cobblemon:neoforge:${project.cobblemon_version}"
 
     modImplementation "thedarkcolour:kotlinforforge-neoforge:${project.kotlin_for_forge_version}"
+    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib:2.4.0"
+    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.4.0"
+    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.4.0"
+    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-reflect:2.4.0"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
