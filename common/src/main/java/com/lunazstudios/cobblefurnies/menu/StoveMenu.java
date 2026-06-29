@@ -45,12 +45,14 @@ public class StoveMenu extends RecipeBookMenu<CraftingInput, CookingPotRecipeBas
     public static final int RESULT_SLOT = 0;
 
     public static final int CRAFTING_GRID_WIDTH = 3;
-    public static final int ITEMS_SIZE = 20;
 
     public static final int CRAFTING_GRID_START = 1;
     public static final int CRAFTING_GRID_END = 9;
     public static final int SEASONING_START = 10;
     public static final int SEASONING_END = 12;
+    public static final int PREVIEW_SLOT = 13;
+    public static final int ITEMS_SIZE = 14;
+    public static final int RECIPE_BOOK_SIZE = SEASONING_END + 1;
 
     public static final int PLAYER_INV_START = 13;
     public static final int PLAYER_INV_END = 39;
@@ -155,12 +157,16 @@ public class StoveMenu extends RecipeBookMenu<CraftingInput, CookingPotRecipeBas
 
     @Override
     public void fillCraftSlotsStackedContents(StackedContents itemHelper) {
-        this.container.fillStackedContents(itemHelper);
+        for (int i = CRAFTING_GRID_START; i <= CRAFTING_GRID_END; i++) {
+            itemHelper.accountSimpleStack(this.container.getItem(i));
+        }
     }
 
     @Override
     public void clearCraftingContent() {
-        container.clearContent();
+        for (int i = CRAFTING_GRID_START; i <= CRAFTING_GRID_END; i++) {
+            container.setItem(i, ItemStack.EMPTY);
+        }
     }
 
     @Override
@@ -227,7 +233,7 @@ public class StoveMenu extends RecipeBookMenu<CraftingInput, CookingPotRecipeBas
 
     @Override
     public int getSize() {
-        return ITEMS_SIZE;
+        return RECIPE_BOOK_SIZE;
     }
 
     public float getBurnProgress() {
