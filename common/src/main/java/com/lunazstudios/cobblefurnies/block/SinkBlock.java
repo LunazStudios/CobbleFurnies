@@ -5,6 +5,7 @@ import com.lunazstudios.cobblefurnies.registry.CFBlockTags;
 import com.lunazstudios.cobblefurnies.util.block.ShapeUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -14,6 +15,8 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -108,6 +111,25 @@ public class SinkBlock extends Block implements SimpleWaterloggedBlock {
                 }
 
                 level.playSound(null, blockPos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
+            }
+
+            spawnWaterParticles(level, blockPos);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+
+        if (itemStack.is(Items.GLASS_BOTTLE)) {
+            if (!level.isClientSide) {
+                ItemStack waterBottle = new ItemStack(Items.POTION);
+                waterBottle.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.WATER));
+
+                if (!player.getAbilities().instabuild) {
+                    itemStack.shrink(1);
+                    if (!player.getInventory().add(waterBottle)) {
+                        player.drop(waterBottle, false);
+                    }
+                }
+
+                level.playSound(null, blockPos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
             }
 
             spawnWaterParticles(level, blockPos);
