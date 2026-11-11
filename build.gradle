@@ -42,14 +42,26 @@ subprojects {
         maven {
             name = "Jared's maven"
             url = "https://maven.blamejared.com/"
+            content {
+                includeGroup("mezz.jei")
+                includeGroup("net.mezzdev.config")
+            }
         }
         maven {
             name = "ModMaven"
             url = "https://modmaven.dev"
+            content {
+                includeGroup("mezz.jei")
+                includeGroup("net.mezzdev.config")
+            }
         }
-        maven {url "https://maven.impactdev.net/repository/development/"}
+        maven {
+            url "https://maven.impactdev.net/repository/development/"
+            content { includeGroup("com.cobblemon") }
+        }
         maven{
-            url = "https://maven.teamresourceful.com/repository/maven-public/"
+            url = "https://maven.resourcefulbees.com/repository/maven-public/"
+            content { includeGroup("earth.terrarium.athena") }
         }
         maven {
             name = 'GeckoLib'
@@ -58,8 +70,14 @@ subprojects {
                 includeGroup("software.bernie.geckolib")
             }
         }
-        maven{url = "https://thedarkcolour.github.io/KotlinForForge/"}
-        maven { url "https://maven.shedaniel.me" }
+        maven {
+            url = "https://thedarkcolour.github.io/KotlinForForge/"
+            content { includeGroup("thedarkcolour") }
+        }
+        maven {
+            url "https://maven.shedaniel.me"
+            content { includeGroupByRegex("me[.]shedaniel.*") }
+        }
     }
 
     dependencies {

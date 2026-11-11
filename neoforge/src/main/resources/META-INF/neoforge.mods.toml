@@ -16,28 +16,42 @@ logoFile = "icon.png"
 [[dependencies.cobblefurnies]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21,)"
+versionRange = "[21.1.265,21.2)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cobblefurnies]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.1,)"
+versionRange = "[1.21.1]"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cobblefurnies]]
 modId = "cobblemon"
 type = "required"
-versionRange = "[1.7.1,)"
+versionRange = "[1.8.4,1.9)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cobblefurnies]]
 modId = "architectury"
 type = "required"
-versionRange = "[13.0.8,)"
+versionRange = "[13.0.11,14)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblefurnies]]
+modId = "athena"
+type = "required"
+versionRange = "[4.0.6,5)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblefurnies]]
+modId = "kotlinforforge"
+type = "required"
+versionRange = "[5.12.0,6)"
 ordering = "NONE"
 side = "BOTH"
 

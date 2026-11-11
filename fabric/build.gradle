@@ -30,7 +30,7 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
-    modImplementation "earth.terrarium.athena:athena-fabric-1.21:${athena_version}"
+    modImplementation "earth.terrarium.athena:athena-fabric-1.21.1:${athena_version}"
     modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
     modImplementation "com.cobblemon:fabric:${project.cobblemon_version}"
 
@@ -38,9 +38,11 @@ dependencies {
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_fabric}"
     modApi "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
 
-    modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}")
+    compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    modRuntimeOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}") { transitive false }
 
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.21"
+    runtimeOnly "net.fabricmc:fabric-language-kotlin:$rootProject.fabric_kotlin"
+    minecraftServerRuntimeLibraries "com.ibm.icu:icu4j:73.2"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')

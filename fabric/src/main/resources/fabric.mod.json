@@ -32,13 +32,14 @@
     "cobblefurnies.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.16.14",
-    "minecraft": "~1.21.1",
+    "fabricloader": ">=0.20.1",
+    "minecraft": "1.21.1",
     "java": ">=21",
-    "athena": ">=4.0.2",
-    "cobblemon": ">=1.7.1",
-    "architectury": ">=13.0.8",
-    "fabric-api": "*"
+    "athena": ">=4.0.6",
+    "cobblemon": ">=1.8.4 <1.9",
+    "architectury": ">=13.0.11",
+    "fabric-api": ">=0.116.18+1.21.1",
+    "fabric-language-kotlin": ">=1.13.12+kotlin.2.4.0"
   },
   "suggests": {
     "another-mod": "*"
