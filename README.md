@@ -8,7 +8,7 @@
     <img src="https://i.imgur.com/Yr2BrdD.png" alt="Requires FabricAPI (For Fabric)" width="211" height="28">
 </p>
 
-Whether you're building a professor's lab, a bustling Pokécenter, or just a cozy cabin in the woods, **CobbleFurnies** is here to bring your creations to life with beautifully crafted, Cobblemon-inspired furniture that blends seamlessly into your Minecraft world!
+**CobbleFurnies** is a furniture and decoration mod for Minecraft. Craft a table and chairs for a corner café, line a kitchen wall with colorful cabinets, or put a nightstand beside your bed. The FurniCrafter is your workbench for making furniture.
 
 <p align="center">
   <a href="https://x.com/LunazStudios">
@@ -21,7 +21,8 @@ Whether you're building a professor's lab, a bustling Pokécenter, or just a coz
 ## Frequently Asked Questions
 
 **Can I play without Cobblemon?**
-Yes. General furniture, wool and carpets are available on their own. Installing Cobblemon unlocks Pokémon statues, Poké Ball furniture, Apricorn and Saccharine furniture, and cooking on stoves. Without Cobblemon, stoves are decorative.
+
+Yes. Cobblemon inspired the mod and is optional as of version 1.2.1. You can furnish your builds with the regular furniture, wool, and carpets, and use stoves as decoration. Installing Cobblemon also lets you cook on stoves and craft Pokémon statues, Poké Ball furniture, and the Apricorn and Saccharine sets.
 
 **Q: Can I use this mod in my modpack or create content with it?** 
 **A:** Absolutely! You're welcome to include **CobbleFurnies** in your modpack or feature it in your videos. Just remember to credit the mod appropriately and avoid claiming it as your own work.
