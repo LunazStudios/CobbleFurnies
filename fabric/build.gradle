@@ -65,6 +65,7 @@ shadowJar {
 
 remapJar {
     input.set shadowJar.archiveFile
+    archiveBaseName.set("${rootProject.archives_name}-Fabric-${rootProject.minecraft_version}")
     destinationDirectory.set(rootProject.file("builds/fabric"))
 }
 

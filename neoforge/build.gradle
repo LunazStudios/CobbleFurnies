@@ -98,6 +98,7 @@ shadowJar {
 
 remapJar {
     input.set shadowJar.archiveFile
+    archiveBaseName.set("${rootProject.archives_name}-NeoForge-${rootProject.minecraft_version}")
     destinationDirectory.set(rootProject.file("builds/neoforge"))
 }
 
