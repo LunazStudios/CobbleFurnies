@@ -1,0 +1,34 @@
+{
+    "variants": {
+        "facing=north,half=lower": {
+            "model": "cobblefurnies:block/arcade/porygon_arcade_lower"
+        },
+        "facing=east,half=lower": {
+            "model": "cobblefurnies:block/arcade/porygon_arcade_lower",
+            "y": 90
+        },
+        "facing=south,half=lower": {
+            "model": "cobblefurnies:block/arcade/porygon_arcade_lower",
+            "y": 180
+        },
+        "facing=west,half=lower": {
+            "model": "cobblefurnies:block/arcade/porygon_arcade_lower",
+            "y": 270
+        },
+        "facing=north,half=upper": {
+            "model": "cobblefurnies:block/arcade/porygon_arcade_upper"
+        },
+        "facing=east,half=upper": {
+            "model": "cobblefurnies:block/arcade/porygon_arcade_upper",
+            "y": 90
+        },
+        "facing=south,half=upper": {
+            "model": "cobblefurnies:block/arcade/porygon_arcade_upper",
+            "y": 180
+        },
+        "facing=west,half=upper": {
+            "model": "cobblefurnies:block/arcade/porygon_arcade_upper",
+            "y": 270
+        }
+    }
+}

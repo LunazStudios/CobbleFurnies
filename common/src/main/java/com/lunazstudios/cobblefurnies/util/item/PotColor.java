@@ -6,25 +6,26 @@ import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
-import java.util.function.Supplier;
 
 public enum PotColor implements StringRepresentable {
-    RED(() -> CobblemonItems.CAMPFIRE_POT_RED),
-    YELLOW(() -> CobblemonItems.CAMPFIRE_POT_YELLOW),
-    WHITE(() -> CobblemonItems.CAMPFIRE_POT_WHITE),
-    PINK(() -> CobblemonItems.CAMPFIRE_POT_PINK),
-    GREEN(() -> CobblemonItems.CAMPFIRE_POT_GREEN),
-    BLUE(() -> CobblemonItems.CAMPFIRE_POT_BLUE),
-    BLACK(() -> CobblemonItems.CAMPFIRE_POT_BLACK);
-
-    private final Supplier<Item> itemSupplier;
-
-    PotColor(Supplier<Item> itemSupplier) {
-        this.itemSupplier = itemSupplier;
-    }
+    RED, YELLOW, WHITE, PINK, GREEN, BLUE, BLACK;
 
     public Item getItem() {
-        return itemSupplier.get();
+        return Items.forColor(this);
+    }
+
+    private static final class Items {
+        private static Item forColor(PotColor color) {
+            return switch (color) {
+                case RED -> CobblemonItems.CAMPFIRE_POT_RED;
+                case YELLOW -> CobblemonItems.CAMPFIRE_POT_YELLOW;
+                case WHITE -> CobblemonItems.CAMPFIRE_POT_WHITE;
+                case PINK -> CobblemonItems.CAMPFIRE_POT_PINK;
+                case GREEN -> CobblemonItems.CAMPFIRE_POT_GREEN;
+                case BLUE -> CobblemonItems.CAMPFIRE_POT_BLUE;
+                case BLACK -> CobblemonItems.CAMPFIRE_POT_BLACK;
+            };
+        }
     }
 
     @Override

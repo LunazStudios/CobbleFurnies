@@ -32,7 +32,9 @@ dependencies {
 
     modImplementation "earth.terrarium.athena:athena-fabric-1.21.1:${athena_version}"
     modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
-    modImplementation "com.cobblemon:fabric:${project.cobblemon_version}"
+    if (!providers.gradleProperty("withoutCobblemon").isPresent()) {
+        modImplementation "com.cobblemon:fabric:${project.cobblemon_version}"
+    }
 
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_api_fabric}"
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_fabric}"
@@ -65,3 +67,5 @@ remapJar {
     input.set shadowJar.archiveFile
     destinationDirectory.set(rootProject.file("builds/fabric"))
 }
+
+apply from: rootProject.file('gradle/client-runs.gradle')

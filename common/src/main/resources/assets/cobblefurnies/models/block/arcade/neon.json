@@ -1,0 +1,40 @@
+{
+    "credit": "Made with Blockbench",
+    "ambientocclusion": false,
+    "render_type": "minecraft:cutout",
+    "elements": [
+        {
+            "from": [
+                2,
+                30,
+                0
+            ],
+            "to": [
+                14,
+                31,
+                0
+            ],
+            "rotation": {
+                "angle": 0,
+                "axis": "y",
+                "origin": [
+                    8,
+                    0,
+                    8
+                ]
+            },
+            "faces": {
+                "north": {
+                    "uv": [
+                        2,
+                        7.875,
+                        3.5,
+                        8
+                    ],
+                    "texture": "#0"
+                }
+            },
+            "shade": false
+        }
+    ]
+}

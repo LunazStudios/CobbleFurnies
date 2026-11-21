@@ -1,5 +1,6 @@
 package com.lunazstudios.cobblefurnies.registry;
 
+import com.lunazstudios.cobblefurnies.compat.CobblemonCompat;
 import com.lunazstudios.cobblefurnies.menu.FurniCrafterMenu;
 import com.lunazstudios.cobblefurnies.menu.StoveMenu;
 import net.minecraft.world.flag.FeatureFlags;
@@ -14,10 +15,15 @@ public class CFMenus {
                     new MenuType<>(FurniCrafterMenu::new, FeatureFlags.DEFAULT_FLAGS)
             );
 
-    public static final Supplier<MenuType<StoveMenu>> STOVE_MENU =
-            CFRegistry.registerMenuType("stove", () ->
-                    new MenuType<>(StoveMenu::new, FeatureFlags.DEFAULT_FLAGS)
-            );
+    public static final class Cooking {
+        public static final Supplier<MenuType<StoveMenu>> STOVE_MENU =
+                CFRegistry.registerMenuType("stove", () ->
+                        new MenuType<>(StoveMenu::new, FeatureFlags.DEFAULT_FLAGS)
+                );
+        static void register() {}
+    }
 
-    public static void register() {}
+    public static void register() {
+        if (CobblemonCompat.LOADED) Cooking.register();
+    }
 }

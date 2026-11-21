@@ -1,6 +1,7 @@
 package com.lunazstudios.cobblefurnies.registry;
 
 import com.lunazstudios.cobblefurnies.CobbleFurnies;
+import com.lunazstudios.cobblefurnies.compat.CobblemonCompat;
 import com.lunazstudios.cobblefurnies.block.*;
 import com.lunazstudios.cobblefurnies.block.item.TooltipBlockItem;
 import net.minecraft.world.item.BlockItem;
@@ -17,19 +18,35 @@ public class CFBlocks {
 
     public static class Properties {
         public static BlockBehaviour.Properties GRASS = Block.Properties.of().strength(0.6F).sound(SoundType.GRASS).mapColor(MapColor.GRASS);
-        public static BlockBehaviour.Properties WOOD = Block.Properties.of().strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava().mapColor(MapColor.WOOD).instrument(NoteBlockInstrument.BASS);
+        public static BlockBehaviour.Properties WOOD = woodProperties();
         public static BlockBehaviour.Properties NETHER_WOOD = Block.Properties.of().strength(2.0F, 3.0F).sound(SoundType.NETHER_WOOD).mapColor(MapColor.WOOD);
         public static BlockBehaviour.Properties BAMBOO_WOOD = WOOD.sound(SoundType.BAMBOO_WOOD);
         public static BlockBehaviour.Properties CHERRY_WOOD = WOOD.sound(SoundType.CHERRY_WOOD);
         public static BlockBehaviour.Properties WOOL = Block.Properties.of().strength(0.8F).sound(SoundType.WOOL).ignitedByLava().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.GUITAR);
-        public static BlockBehaviour.Properties MARBLE = Block.Properties.of().strength(1.5F, 6.0F).sound(SoundType.CALCITE).mapColor(MapColor.QUARTZ).instrument(NoteBlockInstrument.BASEDRUM);
-        public static BlockBehaviour.Properties CONCRETE = Block.Properties.of().strength(1.8F).sound(SoundType.STONE).mapColor(MapColor.QUARTZ).instrument(NoteBlockInstrument.BASEDRUM);
+        public static BlockBehaviour.Properties MARBLE = marbleProperties();
+        public static BlockBehaviour.Properties CONCRETE = concreteProperties();
         public static final BlockBehaviour.Properties LAMP = WOOD
                 .lightLevel(state -> state.hasProperty(BlockStateProperties.LIT) && state.getValue(BlockStateProperties.LIT) ? 15 : 0);
+
+        private static final BlockBehaviour.Properties THEMED_WOOD = CobblemonCompat.LOADED ? WOOD : CobblemonCompat.unavailable(woodProperties());
+        private static final BlockBehaviour.Properties THEMED_CONCRETE = CobblemonCompat.LOADED ? CONCRETE : CobblemonCompat.unavailable(concreteProperties());
+        private static final BlockBehaviour.Properties THEMED_MARBLE = CobblemonCompat.LOADED ? MARBLE : CobblemonCompat.unavailable(marbleProperties());
+
+        private static BlockBehaviour.Properties woodProperties() {
+            return Block.Properties.of().strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava().mapColor(MapColor.WOOD).instrument(NoteBlockInstrument.BASS);
+        }
+
+        private static BlockBehaviour.Properties concreteProperties() {
+            return Block.Properties.of().strength(1.8F).sound(SoundType.STONE).mapColor(MapColor.QUARTZ).instrument(NoteBlockInstrument.BASEDRUM);
+        }
+
+        private static BlockBehaviour.Properties marbleProperties() {
+            return Block.Properties.of().strength(1.5F, 6.0F).sound(SoundType.CALCITE).mapColor(MapColor.QUARTZ).instrument(NoteBlockInstrument.BASEDRUM);
+        }
     }
 
-    public static final Supplier<Block> POKE_BALL_DESK = registerBlock("poke_ball_desk", () -> new PokeDeskBlock(Properties.CONCRETE));
-    public static final Supplier<Block> POKE_BALL_CHAIR = registerBlock("poke_ball_chair", () -> new PokeChairBlock(Properties.CONCRETE));
+    public static final Supplier<Block> POKE_BALL_DESK = registerBlock("poke_ball_desk", () -> new PokeDeskBlock(Properties.THEMED_CONCRETE));
+    public static final Supplier<Block> POKE_BALL_CHAIR = registerBlock("poke_ball_chair", () -> new PokeChairBlock(Properties.THEMED_CONCRETE));
 
     public static final Supplier<Block> LIGHT_TOILET = registerBlock("light_toilet", () -> new ToiletBlock(Properties.MARBLE));
     public static final Supplier<Block> DARK_TOILET = registerBlock("dark_toilet", () -> new ToiletBlock(Properties.MARBLE));
@@ -43,6 +60,12 @@ public class CFBlocks {
 
     public static final Supplier<Block> TV = registerBlock("tv", () -> new TVBlock(Properties.CONCRETE));
     public static final Supplier<Block> CES = registerBlock("ces", () -> new CESBlock(Properties.CONCRETE));
+    /*
+    public static final Supplier<Block> PORYGON_ARCADE = registerBlock("porygon_arcade", () -> new ArcadeBlock(
+            BlockBehaviour.Properties.of().strength(2.0F, 3.0F).sound(SoundType.WOOD).mapColor(MapColor.COLOR_PINK).noOcclusion()));
+    public static final Supplier<Block> BULBASAUR_ARCADE = registerBlock("bulbasaur_arcade", () -> new ArcadeBlock(
+            BlockBehaviour.Properties.of().strength(2.0F, 3.0F).sound(SoundType.WOOD).mapColor(MapColor.COLOR_GREEN).noOcclusion()));
+    */
 
     public static final Supplier<Block> KITCHEN_FLOOR = registerBlock("kitchen_floor", () -> new Block(Properties.CONCRETE));
     public static final Supplier<Block> BAMBOO_FLOOR = registerBlock("bamboo_floor", () -> new Block(Properties.BAMBOO_WOOD));
@@ -58,11 +81,11 @@ public class CFBlocks {
     public static final Supplier<Block> POOL_CERAMIC = registerBlock("pool_ceramic", () -> new Block(Properties.MARBLE));
     public static final Supplier<Block> LAB_FLOOR = registerBlock("lab_floor", () -> new Block(Properties.MARBLE));
 
-    public static final Supplier<Block> STATUE_ANCIENT = registerBlock("statue_ancient", () -> new StatueBlock(Properties.MARBLE.noOcclusion()));
-    public static final Supplier<Block> STATUE_PIKACHU = registerBlock("statue_pikachu", () -> new StatueBlock(Properties.MARBLE.noOcclusion()));
-    public static final Supplier<Block> STATUE_CHARMANDER = registerBlock("statue_charmander", () -> new StatueBlock(Properties.MARBLE.noOcclusion()));
-    public static final Supplier<Block> STATUE_SQUIRTLE = registerBlock("statue_squirtle", () -> new StatueBlock(Properties.MARBLE.noOcclusion()));
-    public static final Supplier<Block> STATUE_BULBASAUR = registerBlock("statue_bulbasaur", () -> new StatueBlock(Properties.MARBLE.noOcclusion()));
+    public static final Supplier<Block> STATUE_ANCIENT = registerBlock("statue_ancient", () -> new StatueBlock(Properties.THEMED_MARBLE.noOcclusion()));
+    public static final Supplier<Block> STATUE_PIKACHU = registerBlock("statue_pikachu", () -> new StatueBlock(Properties.THEMED_MARBLE.noOcclusion()));
+    public static final Supplier<Block> STATUE_CHARMANDER = registerBlock("statue_charmander", () -> new StatueBlock(Properties.THEMED_MARBLE.noOcclusion()));
+    public static final Supplier<Block> STATUE_SQUIRTLE = registerBlock("statue_squirtle", () -> new StatueBlock(Properties.THEMED_MARBLE.noOcclusion()));
+    public static final Supplier<Block> STATUE_BULBASAUR = registerBlock("statue_bulbasaur", () -> new StatueBlock(Properties.THEMED_MARBLE.noOcclusion()));
 
     public static final Supplier<Block> BONSAI_PLANT = registerBlock("bonsai_plant", () -> new BonsaiPlantBlock(Properties.WOOD.noOcclusion()));
     public static final Supplier<Block> MINI_TOPIARY = registerBlock("mini_topiary", () -> new MiniTopiaryBlock(Properties.WOOD.noOcclusion()));
@@ -179,8 +202,8 @@ public class CFBlocks {
     public static final Supplier<Block> CHERRY_CHAIR = registerBlock("cherry_chair", () -> new WoodChairBlock(Properties.CHERRY_WOOD));
     public static final Supplier<Block> CRIMSON_CHAIR = registerBlock("crimson_chair", () -> new WoodChairBlock(Properties.NETHER_WOOD));
     public static final Supplier<Block> WARPED_CHAIR = registerBlock("warped_chair", () -> new WoodChairBlock(Properties.NETHER_WOOD));
-    public static final Supplier<Block> APRICORN_CHAIR = registerBlock("apricorn_chair", () -> new WoodChairBlock(Properties.WOOD));
-    public static final Supplier<Block> SACCHARINE_CHAIR = registerBlock("saccharine_chair", () -> new WoodChairBlock(Properties.WOOD));
+    public static final Supplier<Block> APRICORN_CHAIR = registerBlock("apricorn_chair", () -> new WoodChairBlock(Properties.THEMED_WOOD));
+    public static final Supplier<Block> SACCHARINE_CHAIR = registerBlock("saccharine_chair", () -> new WoodChairBlock(Properties.THEMED_WOOD));
 
     public static final Supplier<Block> OAK_NIGHTSTAND = registerBlockWithTooltip("oak_nightstand", () -> new NightStandBlock(Properties.WOOD));
     public static final Supplier<Block> SPRUCE_NIGHTSTAND = registerBlockWithTooltip("spruce_nightstand", () -> new NightStandBlock(Properties.WOOD));
@@ -193,8 +216,8 @@ public class CFBlocks {
     public static final Supplier<Block> CHERRY_NIGHTSTAND = registerBlockWithTooltip("cherry_nightstand", () -> new NightStandBlock(Properties.CHERRY_WOOD));
     public static final Supplier<Block> CRIMSON_NIGHTSTAND = registerBlockWithTooltip("crimson_nightstand", () -> new NightStandBlock(Properties.NETHER_WOOD));
     public static final Supplier<Block> WARPED_NIGHTSTAND = registerBlockWithTooltip("warped_nightstand", () -> new NightStandBlock(Properties.NETHER_WOOD));
-    public static final Supplier<Block> APRICORN_NIGHTSTAND = registerBlockWithTooltip("apricorn_nightstand", () -> new NightStandBlock(Properties.WOOD));
-    public static final Supplier<Block> SACCHARINE_NIGHTSTAND = registerBlockWithTooltip("saccharine_nightstand", () -> new NightStandBlock(Properties.WOOD));
+    public static final Supplier<Block> APRICORN_NIGHTSTAND = registerBlockWithTooltip("apricorn_nightstand", () -> new NightStandBlock(Properties.THEMED_WOOD));
+    public static final Supplier<Block> SACCHARINE_NIGHTSTAND = registerBlockWithTooltip("saccharine_nightstand", () -> new NightStandBlock(Properties.THEMED_WOOD));
 
     public static final Supplier<Block> OAK_WALL_SUPPORT = registerBlock("oak_wall_support", () -> new WallSupportBlock(Properties.WOOD));
     public static final Supplier<Block> SPRUCE_WALL_SUPPORT = registerBlock("spruce_wall_support", () -> new WallSupportBlock(Properties.WOOD));
@@ -207,8 +230,8 @@ public class CFBlocks {
     public static final Supplier<Block> CHERRY_WALL_SUPPORT = registerBlock("cherry_wall_support", () -> new WallSupportBlock(Properties.CHERRY_WOOD));
     public static final Supplier<Block> CRIMSON_WALL_SUPPORT = registerBlock("crimson_wall_support", () -> new WallSupportBlock(Properties.NETHER_WOOD));
     public static final Supplier<Block> WARPED_WALL_SUPPORT = registerBlock("warped_wall_support", () -> new WallSupportBlock(Properties.NETHER_WOOD));
-    public static final Supplier<Block> APRICORN_WALL_SUPPORT = registerBlock("apricorn_wall_support", () -> new WallSupportBlock(Properties.WOOD));
-    public static final Supplier<Block> SACCHARINE_WALL_SUPPORT = registerBlock("saccharine_wall_support", () -> new WallSupportBlock(Properties.WOOD));
+    public static final Supplier<Block> APRICORN_WALL_SUPPORT = registerBlock("apricorn_wall_support", () -> new WallSupportBlock(Properties.THEMED_WOOD));
+    public static final Supplier<Block> SACCHARINE_WALL_SUPPORT = registerBlock("saccharine_wall_support", () -> new WallSupportBlock(Properties.THEMED_WOOD));
 
     public static final Supplier<Block> RED_STOOL = registerBlock("red_stool", () -> new StoolBlock(Properties.WOOD));
     public static final Supplier<Block> RED_DARK_STOOL = registerBlock("red_dark_stool", () -> new StoolBlock(Properties.WOOD));
@@ -321,8 +344,8 @@ public class CFBlocks {
     public static final Supplier<Block> CHERRY_TABLE = registerBlock("cherry_table", () -> new TableBlock(Properties.CHERRY_WOOD));
     public static final Supplier<Block> CRIMSON_TABLE = registerBlock("crimson_table", () -> new TableBlock(Properties.NETHER_WOOD));
     public static final Supplier<Block> WARPED_TABLE = registerBlock("warped_table", () -> new TableBlock(Properties.NETHER_WOOD));
-    public static final Supplier<Block> APRICORN_TABLE = registerBlock("apricorn_table", () -> new TableBlock(Properties.WOOD));
-    public static final Supplier<Block> SACCHARINE_TABLE = registerBlock("saccharine_table", () -> new TableBlock(Properties.WOOD));
+    public static final Supplier<Block> APRICORN_TABLE = registerBlock("apricorn_table", () -> new TableBlock(Properties.THEMED_WOOD));
+    public static final Supplier<Block> SACCHARINE_TABLE = registerBlock("saccharine_table", () -> new TableBlock(Properties.THEMED_WOOD));
 
     public static final Supplier<Block> RED_SINK = registerBlock("red_sink", () -> new SinkBlock(Properties.MARBLE));
     public static final Supplier<Block> ORANGE_SINK = registerBlock("orange_sink", () -> new SinkBlock(Properties.MARBLE));
@@ -341,22 +364,22 @@ public class CFBlocks {
     public static final Supplier<Block> GRAY_SINK = registerBlock("gray_sink", () -> new SinkBlock(Properties.MARBLE));
     public static final Supplier<Block> BLACK_SINK = registerBlock("black_sink", () -> new SinkBlock(Properties.MARBLE));
 
-    public static final Supplier<Block> RED_STOVE = registerBlockWithTooltip("red_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> ORANGE_STOVE = registerBlockWithTooltip("orange_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> YELLOW_STOVE = registerBlockWithTooltip("yellow_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> BROWN_STOVE = registerBlockWithTooltip("brown_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> LIME_STOVE = registerBlockWithTooltip("lime_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> GREEN_STOVE = registerBlockWithTooltip("green_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> CYAN_STOVE = registerBlockWithTooltip("cyan_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> LIGHT_BLUE_STOVE = registerBlockWithTooltip("light_blue_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> BLUE_STOVE = registerBlockWithTooltip("blue_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> MAGENTA_STOVE = registerBlockWithTooltip("magenta_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> PURPLE_STOVE = registerBlockWithTooltip("purple_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> PINK_STOVE = registerBlockWithTooltip("pink_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> WHITE_STOVE = registerBlockWithTooltip("white_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> LIGHT_GRAY_STOVE = registerBlockWithTooltip("light_gray_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> GRAY_STOVE = registerBlockWithTooltip("gray_stove", () -> new StoveBlock(Properties.MARBLE));
-    public static final Supplier<Block> BLACK_STOVE = registerBlockWithTooltip("black_stove", () -> new StoveBlock(Properties.MARBLE));
+    public static final Supplier<Block> RED_STOVE = registerStove("red_stove");
+    public static final Supplier<Block> ORANGE_STOVE = registerStove("orange_stove");
+    public static final Supplier<Block> YELLOW_STOVE = registerStove("yellow_stove");
+    public static final Supplier<Block> BROWN_STOVE = registerStove("brown_stove");
+    public static final Supplier<Block> LIME_STOVE = registerStove("lime_stove");
+    public static final Supplier<Block> GREEN_STOVE = registerStove("green_stove");
+    public static final Supplier<Block> CYAN_STOVE = registerStove("cyan_stove");
+    public static final Supplier<Block> LIGHT_BLUE_STOVE = registerStove("light_blue_stove");
+    public static final Supplier<Block> BLUE_STOVE = registerStove("blue_stove");
+    public static final Supplier<Block> MAGENTA_STOVE = registerStove("magenta_stove");
+    public static final Supplier<Block> PURPLE_STOVE = registerStove("purple_stove");
+    public static final Supplier<Block> PINK_STOVE = registerStove("pink_stove");
+    public static final Supplier<Block> WHITE_STOVE = registerStove("white_stove");
+    public static final Supplier<Block> LIGHT_GRAY_STOVE = registerStove("light_gray_stove");
+    public static final Supplier<Block> GRAY_STOVE = registerStove("gray_stove");
+    public static final Supplier<Block> BLACK_STOVE = registerStove("black_stove");
 
     public static final Supplier<Block> RED_CABINETRY = registerBlock("red_cabinetry", () -> new CabinetryBlock(Properties.MARBLE));
     public static final Supplier<Block> ORANGE_CABINETRY = registerBlock("orange_cabinetry", () -> new CabinetryBlock(Properties.MARBLE));
@@ -420,8 +443,8 @@ public class CFBlocks {
     public static final Supplier<Block> CHERRY_CABINET = registerBlock("cherry_cabinet", () -> new CabinetBlock(Properties.CHERRY_WOOD));
     public static final Supplier<Block> CRIMSON_CABINET = registerBlock("crimson_cabinet", () -> new CabinetBlock(Properties.NETHER_WOOD));
     public static final Supplier<Block> WARPED_CABINET = registerBlock("warped_cabinet", () -> new CabinetBlock(Properties.NETHER_WOOD));
-    public static final Supplier<Block> APRICORN_CABINET = registerBlock("apricorn_cabinet", () -> new CabinetBlock(Properties.WOOD));
-    public static final Supplier<Block> SACCHARINE_CABINET = registerBlock("saccharine_cabinet", () -> new CabinetBlock(Properties.WOOD));
+    public static final Supplier<Block> APRICORN_CABINET = registerBlock("apricorn_cabinet", () -> new CabinetBlock(Properties.THEMED_WOOD));
+    public static final Supplier<Block> SACCHARINE_CABINET = registerBlock("saccharine_cabinet", () -> new CabinetBlock(Properties.THEMED_WOOD));
 
     public static <T extends Block> Supplier<T> registerBlock(String name, Supplier<T> block) {
         Supplier<T> supplier = CFRegistry.registerBlock(name, block);
@@ -439,6 +462,11 @@ public class CFBlocks {
         return CFRegistry.registerBlock(name, block);
     }
 
+    private static Supplier<Block> registerStove(String name) {
+        Supplier<Block> stove = () -> StoveBlock.create(Properties.MARBLE);
+        return CobblemonCompat.LOADED ? registerBlockWithTooltip(name, stove) : registerBlock(name, stove);
+    }
+
     public static <T extends Block> Supplier<T> registerBlockWithTooltip(String name, Supplier<T> block) {
         Supplier<T> supplier = CFRegistry.registerBlock(name, block);
 
@@ -446,11 +474,7 @@ public class CFBlocks {
 
         CFRegistry.registerItem(
                 name,
-                () -> new TooltipBlockItem(
-                        supplier.get(),
-                        new Item.Properties(),
-                        tooltipKey
-                ),
+                () -> new TooltipBlockItem(supplier.get(), new Item.Properties(), tooltipKey),
                 "tab"
         );
 

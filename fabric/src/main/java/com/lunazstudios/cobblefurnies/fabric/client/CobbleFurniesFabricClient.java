@@ -1,8 +1,8 @@
 package com.lunazstudios.cobblefurnies.fabric.client;
 
-import com.cobblemon.mod.common.CobblemonMenuType;
 import com.lunazstudios.cobblefurnies.client.CobbleFurniesClient;
 import com.lunazstudios.cobblefurnies.client.screen.FurniCrafterScreen;
+import com.lunazstudios.cobblefurnies.compat.CobblemonCompat;
 import com.lunazstudios.cobblefurnies.client.screen.StoveScreen;
 import com.lunazstudios.cobblefurnies.registry.CFBlocks;
 import com.lunazstudios.cobblefurnies.registry.CFMenus;
@@ -15,9 +15,10 @@ public final class CobbleFurniesFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         CobbleFurniesClient.init();
-
         MenuScreens.register(CFMenus.FURNI_CRAFTER_MENU.get(), FurniCrafterScreen::new);
-        MenuScreens.register(CFMenus.STOVE_MENU.get(), StoveScreen::new);
+        if (CobblemonCompat.LOADED) {
+            CookingScreens.register();
+        }
 
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.translucent(),
                 CFBlocks.LIGHT_TOILET.get(), CFBlocks.DARK_TOILET.get()
@@ -58,5 +59,11 @@ public final class CobbleFurniesFabricClient implements ClientModInitializer {
 
                 CFBlocks.TV.get(), CFBlocks.CES.get(), CFBlocks.LIGHT_FRIDGE.get(), CFBlocks.LIGHT_FREEZER.get(), CFBlocks.DARK_FREEZER.get()
                 );
+    }
+
+    private static final class CookingScreens {
+        static void register() {
+            MenuScreens.register(CFMenus.Cooking.STOVE_MENU.get(), StoveScreen::new);
+        }
     }
 }

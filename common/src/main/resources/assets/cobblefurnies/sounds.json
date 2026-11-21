@@ -1,4 +1,11 @@
 {
+  "block.arcade.play": {
+    "category": "block",
+    "sounds": [
+      "cobblefurnies:arcade_play"
+    ],
+    "subtitle": "subtitles.block.cobblefurnies.arcade.play"
+  },
   "block.fridge.open": {
     "category": "block",
     "sounds": [

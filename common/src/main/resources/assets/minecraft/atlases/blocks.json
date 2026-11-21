@@ -1,0 +1,49 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:block/black_terracotta",
+      "sprite": "cobblemon:block/campfire_pot/campfire_pot_black"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:block/blue_terracotta",
+      "sprite": "cobblemon:block/campfire_pot/campfire_pot_blue"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:block/green_terracotta",
+      "sprite": "cobblemon:block/campfire_pot/campfire_pot_green"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:block/pink_terracotta",
+      "sprite": "cobblemon:block/campfire_pot/campfire_pot_pink"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:block/red_terracotta",
+      "sprite": "cobblemon:block/campfire_pot/campfire_pot_red"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:block/white_terracotta",
+      "sprite": "cobblemon:block/campfire_pot/campfire_pot_white"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:block/yellow_terracotta",
+      "sprite": "cobblemon:block/campfire_pot/campfire_pot_yellow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:block/orange_terracotta",
+      "sprite": "cobblemon:block/campfire_pot/campfire_pot_broth"
+    },
+    {
+      "type": "minecraft:directory",
+      "source": "block/campfire_pot",
+      "prefix": "block/campfire_pot/"
+    }
+  ]
+}

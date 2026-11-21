@@ -1,4 +1,7 @@
 {
+    "block.cobblefurnies.bulbasaur_arcade": "Bulbasaur Arcade",
+    "subtitles.block.cobblefurnies.arcade.play": "Arcade plays",
+    "block.cobblefurnies.porygon_arcade": "Porygon Arcade",
     "item_group.cobblefurnies.tab": "CobbleFurnies",
 
     "gui.cobblefurnies.hold_shift_for_details": "Hold SHIFT for details.",

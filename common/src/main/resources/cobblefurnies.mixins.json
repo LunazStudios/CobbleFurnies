@@ -7,6 +7,7 @@
     "client.GuiGraphicsInvoker"
   ],
   "mixins": [
+    "BlockPropertiesAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

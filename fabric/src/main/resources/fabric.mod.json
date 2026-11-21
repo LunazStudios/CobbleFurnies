@@ -36,12 +36,14 @@
     "minecraft": "1.21.1",
     "java": ">=21",
     "athena": ">=4.0.6",
-    "cobblemon": ">=1.8.4 <1.9",
     "architectury": ">=13.0.11",
     "fabric-api": ">=0.116.18+1.21.1",
     "fabric-language-kotlin": ">=1.13.12+kotlin.2.4.0"
   },
   "suggests": {
-    "another-mod": "*"
+    "cobblemon": ">=1.8.4 <1.9"
+  },
+  "breaks": {
+    "cobblemon": ["<1.8.4", ">=1.9"]
   }
 }

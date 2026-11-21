@@ -2,7 +2,7 @@ package com.lunazstudios.cobblefurnies.block;
 
 import com.lunazstudios.cobblefurnies.block.properties.CFBlockStateProperties;
 import com.lunazstudios.cobblefurnies.registry.CFBlockTags;
-import com.lunazstudios.cobblefurnies.util.block.ShapeUtil;
+import com.lunazstudios.cobblefurnies.util.block.ConnectedCounterShapes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -54,26 +54,7 @@ public class SinkBlock extends Block implements SimpleWaterloggedBlock {
             Block.box(7, 19, 9, 9, 21, 13),
             Block.box(7, 18, 9, 9, 19, 11)
     );
-    protected static final VoxelShape TOP_SHAPE_EAST = ShapeUtil.rotateShape(TOP_SHAPE_NORTH, Direction.EAST);
-    protected static final VoxelShape TOP_SHAPE_SOUTH = ShapeUtil.rotateShape(TOP_SHAPE_NORTH, Direction.SOUTH);
-    protected static final VoxelShape TOP_SHAPE_WEST = ShapeUtil.rotateShape(TOP_SHAPE_NORTH, Direction.WEST);
-
-    protected static final VoxelShape BOTTOM_SELF_SHAPE = Block.box(1, 0, 1, 15, 11, 15);
-
-    protected static final VoxelShape BOTTOM_MIDDLE_SHAPE_NORTH = Block.box(0, 0, 1, 16, 11, 15);
-    protected static final VoxelShape BOTTOM_MIDDLE_SHAPE_EAST = ShapeUtil.rotateShape(BOTTOM_MIDDLE_SHAPE_NORTH, Direction.EAST);
-    protected static final VoxelShape BOTTOM_MIDDLE_SHAPE_SOUTH = ShapeUtil.rotateShape(BOTTOM_MIDDLE_SHAPE_NORTH, Direction.SOUTH);
-    protected static final VoxelShape BOTTOM_MIDDLE_SHAPE_WEST = ShapeUtil.rotateShape(BOTTOM_MIDDLE_SHAPE_NORTH, Direction.WEST);
-
-    protected static final VoxelShape BOTTOM_RIGHT_SHAPE_NORTH = Block.box(1, 0, 1, 16, 11, 15);
-    protected static final VoxelShape BOTTOM_RIGHT_SHAPE_EAST = ShapeUtil.rotateShape(BOTTOM_RIGHT_SHAPE_NORTH, Direction.EAST);
-    protected static final VoxelShape BOTTOM_RIGHT_SHAPE_SOUTH = ShapeUtil.rotateShape(BOTTOM_RIGHT_SHAPE_NORTH, Direction.SOUTH);
-    protected static final VoxelShape BOTTOM_RIGHT_SHAPE_WEST = ShapeUtil.rotateShape(BOTTOM_RIGHT_SHAPE_NORTH, Direction.WEST);
-
-    protected static final VoxelShape BOTTOM_LEFT_SHAPE_NORTH = Block.box(0, 0, 1, 15, 11, 15);
-    protected static final VoxelShape BOTTOM_LEFT_SHAPE_EAST = ShapeUtil.rotateShape(BOTTOM_LEFT_SHAPE_NORTH, Direction.EAST);
-    protected static final VoxelShape BOTTOM_LEFT_SHAPE_SOUTH = ShapeUtil.rotateShape(BOTTOM_LEFT_SHAPE_NORTH, Direction.SOUTH);
-    protected static final VoxelShape BOTTOM_LEFT_SHAPE_WEST = ShapeUtil.rotateShape(BOTTOM_LEFT_SHAPE_NORTH, Direction.WEST);
+    private static final ConnectedCounterShapes SHAPES = new ConnectedCounterShapes(TOP_SHAPE_NORTH);
 
     public SinkBlock(Properties properties) {
         super(properties);
@@ -132,78 +113,7 @@ public class SinkBlock extends Block implements SimpleWaterloggedBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        Direction facing = state.getValue(FACING);
-        boolean connectedLeft = state.getValue(CONNECTED_LEFT);
-        boolean connectedRight = state.getValue(CONNECTED_RIGHT);
-
-        VoxelShape topShape;
-        VoxelShape bottomShape;
-
-        switch (facing) {
-            case EAST:
-                topShape = TOP_SHAPE_EAST;
-                break;
-            case SOUTH:
-                topShape = TOP_SHAPE_SOUTH;
-                break;
-            case WEST:
-                topShape = TOP_SHAPE_WEST;
-                break;
-            default:
-                topShape = TOP_SHAPE_NORTH;
-                break;
-        }
-
-        if (connectedLeft && connectedRight) {
-            switch (facing) {
-                case EAST:
-                    bottomShape = BOTTOM_MIDDLE_SHAPE_EAST;
-                    break;
-                case SOUTH:
-                    bottomShape = BOTTOM_MIDDLE_SHAPE_SOUTH;
-                    break;
-                case WEST:
-                    bottomShape = BOTTOM_MIDDLE_SHAPE_WEST;
-                    break;
-                default:
-                    bottomShape = BOTTOM_MIDDLE_SHAPE_NORTH;
-                    break;
-            }
-        } else if (connectedLeft) {
-            switch (facing) {
-                case EAST:
-                    bottomShape = BOTTOM_LEFT_SHAPE_EAST;
-                    break;
-                case SOUTH:
-                    bottomShape = BOTTOM_LEFT_SHAPE_SOUTH;
-                    break;
-                case WEST:
-                    bottomShape = BOTTOM_LEFT_SHAPE_WEST;
-                    break;
-                default:
-                    bottomShape = BOTTOM_LEFT_SHAPE_NORTH;
-                    break;
-            }
-        } else if (connectedRight) {
-            switch (facing) {
-                case EAST:
-                    bottomShape = BOTTOM_RIGHT_SHAPE_EAST;
-                    break;
-                case SOUTH:
-                    bottomShape = BOTTOM_RIGHT_SHAPE_SOUTH;
-                    break;
-                case WEST:
-                    bottomShape = BOTTOM_RIGHT_SHAPE_WEST;
-                    break;
-                default:
-                    bottomShape = BOTTOM_RIGHT_SHAPE_NORTH;
-                    break;
-            }
-        } else {
-            bottomShape = BOTTOM_SELF_SHAPE;
-        }
-
-        return Shapes.or(topShape, bottomShape);
+        return SHAPES.get(state.getValue(FACING), state.getValue(CONNECTED_LEFT), state.getValue(CONNECTED_RIGHT));
     }
 
     @Nullable

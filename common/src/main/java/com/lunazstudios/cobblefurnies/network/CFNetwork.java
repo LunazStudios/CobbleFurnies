@@ -3,6 +3,7 @@ package com.lunazstudios.cobblefurnies.network;
 import com.lunazstudios.cobblefurnies.network.message.CraftRecipeMessage;
 import com.lunazstudios.cobblefurnies.network.message.SyncCraftableRecipesMessage;
 import com.lunazstudios.cobblefurnies.network.message.ToggleStoveLidMessage;
+import com.lunazstudios.cobblefurnies.compat.CobblemonCompat;
 import dev.architectury.platform.Platform;
 import dev.architectury.networking.NetworkManager;
 import net.fabricmc.api.EnvType;
@@ -25,12 +26,14 @@ public class CFNetwork {
                 CraftRecipeMessage::handle
         );
 
-        NetworkManager.registerReceiver(
-                NetworkManager.Side.C2S,
-                TOGGLE_STOVE_LID_TYPE,
-                ToggleStoveLidMessage.CODEC,
-                ToggleStoveLidMessage::handle
-        );
+        if (CobblemonCompat.LOADED) {
+            NetworkManager.registerReceiver(
+                    NetworkManager.Side.C2S,
+                    TOGGLE_STOVE_LID_TYPE,
+                    ToggleStoveLidMessage.CODEC,
+                    ToggleStoveLidMessage::handle
+            );
+        }
 
         if (Platform.getEnv() == EnvType.CLIENT) {
             NetworkManager.registerReceiver(

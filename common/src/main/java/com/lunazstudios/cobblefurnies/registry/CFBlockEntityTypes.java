@@ -1,13 +1,28 @@
 package com.lunazstudios.cobblefurnies.registry;
 
 import com.lunazstudios.cobblefurnies.block.entity.*;
+import com.lunazstudios.cobblefurnies.compat.CobblemonCompat;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 import java.util.function.Supplier;
 
 public class CFBlockEntityTypes {
-    public static final Supplier<BlockEntityType<StoveBlockEntity>> STOVE = CFRegistry.registerBlockEntityType("stove",
-            () -> CFRegistry.createBlockEntityType(StoveBlockEntity::new,
+    /*
+    public static final Supplier<BlockEntityType<ArcadeBlockEntity>> ARCADE = CFRegistry.registerBlockEntityType("arcade",
+            () -> CFRegistry.createBlockEntityType(ArcadeBlockEntity::new,
+                    CFBlocks.PORYGON_ARCADE.get(), CFBlocks.BULBASAUR_ARCADE.get()));
+    */
+
+    public static final Supplier<? extends BlockEntityType<?>> STOVE = CobblemonCompat.LOADED
+            ? Cooking.STOVE : registerStove(DecorativeStoveBlockEntity::new);
+
+    public static final class Cooking {
+        public static final Supplier<BlockEntityType<StoveBlockEntity>> STOVE = registerStove(StoveBlockEntity::new);
+    }
+
+    private static <T extends BlockEntity> Supplier<BlockEntityType<T>> registerStove(CFRegistry.BlockEntitySupplier<T> factory) {
+        return CFRegistry.registerBlockEntityType("stove", () -> CFRegistry.createBlockEntityType(factory,
                     CFBlocks.RED_STOVE.get(),
                     CFBlocks.ORANGE_STOVE.get(),
                     CFBlocks.YELLOW_STOVE.get(),
@@ -23,8 +38,8 @@ public class CFBlockEntityTypes {
                     CFBlocks.WHITE_STOVE.get(),
                     CFBlocks.LIGHT_GRAY_STOVE.get(),
                     CFBlocks.GRAY_STOVE.get(),
-                    CFBlocks.BLACK_STOVE.get()
-                    ));
+                    CFBlocks.BLACK_STOVE.get()));
+    }
 
     public static final Supplier<BlockEntityType<DrawerBlockEntity>> DRAWER = CFRegistry.registerBlockEntityType("drawer",
             () -> CFRegistry.createBlockEntityType(DrawerBlockEntity::new,

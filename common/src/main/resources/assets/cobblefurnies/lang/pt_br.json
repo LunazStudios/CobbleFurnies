@@ -1,4 +1,7 @@
 {
+    "block.cobblefurnies.bulbasaur_arcade": "Fliperama do Bulbasaur",
+    "subtitles.block.cobblefurnies.arcade.play": "Fliperama toca",
+    "block.cobblefurnies.porygon_arcade": "Fliperama do Porygon",
     "item_group.cobblefurnies.tab": "CobbleFurnies",
 
     "gui.cobblefurnies.hold_shift_for_details": "Segure SHIFT para mais detalhes.",

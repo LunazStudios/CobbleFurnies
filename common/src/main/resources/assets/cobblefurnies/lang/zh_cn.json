@@ -1,4 +1,7 @@
 {
+  "block.cobblefurnies.bulbasaur_arcade": "妙蛙种子街机",
+  "subtitles.block.cobblefurnies.arcade.play": "街机播放",
+  "block.cobblefurnies.porygon_arcade": "多边兽街机",
   "item_group.cobblefurnies.tab": "CobbleFurnies",
 
   "gui.cobblefurnies.hold_shift_for_details": "按 SHIFT 查看详情。",

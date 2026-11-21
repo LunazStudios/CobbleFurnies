@@ -1,6 +1,7 @@
 package com.lunazstudios.cobblefurnies.entity;
 
-import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import com.lunazstudios.cobblefurnies.block.SeatBlock;
 import com.lunazstudios.cobblefurnies.registry.CFEntityTypes;
 import net.minecraft.core.BlockPos;
@@ -27,6 +28,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 public class SeatEntity extends Entity {
+    private static final ResourceLocation POKEMON = ResourceLocation.fromNamespaceAndPath("cobblemon", "pokemon");
+
     public SeatEntity(Level level) {
         super(CFEntityTypes.SEAT.get(), level);
         this.noPhysics = true;
@@ -44,7 +47,7 @@ public class SeatEntity extends Entity {
         boolean canSit;
         if (state.getBlock() instanceof SeatBlock seatBlock) canSit = seatBlock.isSittable(state);
         else canSit = false;
-        if (isVehicle() && canSit) return;
+        if (isVehicle() && canSit && state.getBlock().isEnabled(level().enabledFeatures())) return;
 
         this.discard();
         this.level().updateNeighbourForOutputSignal(this.blockPosition(), this.level().getBlockState(this.blockPosition()).getBlock());
@@ -81,7 +84,7 @@ public class SeatEntity extends Entity {
         if (entity instanceof Creeper) return 1 / 4f;
         if (entity instanceof Cat) return 1 / 8f;
         if (entity instanceof Wolf) return 1 / 16f;
-        if (entity instanceof PokemonEntity) return 1 / 16f;
+        if (POKEMON.equals(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()))) return 1 / 16f;
         return 0;
     }
 

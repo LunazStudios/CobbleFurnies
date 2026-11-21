@@ -1,5 +1,6 @@
 {
     "values": [
+        {"id": "#cobblefurnies:arcades", "required": false},
         {"id": "#cobblefurnies:sinks", "required": false},
         {"id": "#cobblefurnies:stoves", "required": false},
         {"id": "#cobblefurnies:cabinetry", "required": false},

@@ -84,7 +84,7 @@ public class NightStandBlock extends BaseEntityBlock {
         if (player.isShiftKeyDown() && itemStack.isEmpty()) {
             if (state.getValue(CFBlockStateProperties.HAS_CONCRETE)) {
                 DyeColor currentColor = state.getValue(CFBlockStateProperties.CONCRETE_COLOR);
-                ResourceLocation concreteId = new ResourceLocation("minecraft", currentColor.getName() + "_concrete");
+                ResourceLocation concreteId = ResourceLocation.withDefaultNamespace(currentColor.getName() + "_concrete");
                 Block concreteBlock = BuiltInRegistries.BLOCK.get(concreteId);
                 ItemStack concreteStack = new ItemStack(concreteBlock.asItem());
 
@@ -133,7 +133,7 @@ public class NightStandBlock extends BaseEntityBlock {
     @Nullable
     private DyeColor getConcreteColor(Block block) {
         for (DyeColor color : DyeColor.values()) {
-            ResourceLocation id = new ResourceLocation("minecraft", color.getName() + "_concrete");
+            ResourceLocation id = ResourceLocation.withDefaultNamespace(color.getName() + "_concrete");
             Block expected = BuiltInRegistries.BLOCK.get(id);
             if (block == expected) {
                 return color;
@@ -147,7 +147,7 @@ public class NightStandBlock extends BaseEntityBlock {
 
         if (state.getValue(HAS_CONCRETE)) {
             DyeColor color = state.getValue(CONCRETE_COLOR);
-            ResourceLocation concreteId = new ResourceLocation("minecraft", color.getName() + "_concrete");
+            ResourceLocation concreteId = ResourceLocation.withDefaultNamespace(color.getName() + "_concrete");
             Block concreteBlock = BuiltInRegistries.BLOCK.get(concreteId);
             ItemStack concreteStack = new ItemStack(concreteBlock.asItem());
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), concreteStack);

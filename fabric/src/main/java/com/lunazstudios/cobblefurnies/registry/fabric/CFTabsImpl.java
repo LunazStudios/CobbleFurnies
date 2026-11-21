@@ -15,7 +15,9 @@ public class CFTabsImpl {
             CobbleFurnies.id("tab"),
             FabricItemGroup.builder().title(Component.translatable("item_group." + CobbleFurnies.MOD_ID + ".tab"))
                     .icon(() -> new ItemStack(CFBlocks.LIGHT_BLUE_SOFA.get().asItem())).displayItems((parameters, output) -> {
-                        output.acceptAll(CFRegistry.getAllModItems());
+                        CFRegistry.getAllModItems().stream()
+                        .filter(stack -> stack.isItemEnabled(parameters.enabledFeatures()))
+                        .forEach(output::accept);
                     }).build());
 
     public static void register() {}

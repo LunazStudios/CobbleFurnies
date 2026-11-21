@@ -4,7 +4,6 @@
     <img src="https://i.imgur.com/D40j3RV.png" alt="Fabric" width="105" height="28">
     <img src="https://i.imgur.com/ou0Id20.png" alt="NeoForge" width="127" height="28">
     <img src="https://i.imgur.com/pIrXd83.png" alt="Requires ArchitecturyAPI" width="222" height="28">
-    <img src="https://i.imgur.com/48cXpQd.png" alt="Requires Cobblemon" width="211" height="28">
     <img src="https://i.imgur.com/gtHzVOl.png" alt="Requires AthenaCTM" width="193" height="28">
     <img src="https://i.imgur.com/Yr2BrdD.png" alt="Requires FabricAPI (For Fabric)" width="211" height="28">
 </p>
@@ -20,6 +19,9 @@ Whether you're building a professor's lab, a bustling Pokécenter, or just a coz
 ***
 
 ## Frequently Asked Questions
+
+**Can I play without Cobblemon?**
+Yes. General furniture, wool and carpets are available on their own. Installing Cobblemon unlocks Pokémon statues, Poké Ball furniture, Apricorn and Saccharine furniture, and cooking on stoves. Without Cobblemon, stoves are decorative.
 
 **Q: Can I use this mod in my modpack or create content with it?** 
 **A:** Absolutely! You're welcome to include **CobbleFurnies** in your modpack or feature it in your videos. Just remember to credit the mod appropriately and avoid claiming it as your own work.

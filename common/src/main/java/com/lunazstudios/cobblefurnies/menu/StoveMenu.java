@@ -60,7 +60,7 @@ public class StoveMenu extends RecipeBookMenu<CraftingInput, CookingPotRecipeBas
     public static final int PLAYER_HOTBAR_END = 48;
 
     public StoveMenu(int containerId, Inventory playerInventory) {
-        super(CFMenus.STOVE_MENU.get(), containerId);
+        super(CFMenus.Cooking.STOVE_MENU.get(), containerId);
         this.playerInventory = playerInventory;
         this.container = new StoveContainer(this, CRAFTING_GRID_WIDTH, CRAFTING_GRID_WIDTH);
         this.resultContainer = new ResultContainer();
@@ -73,7 +73,7 @@ public class StoveMenu extends RecipeBookMenu<CraftingInput, CookingPotRecipeBas
     }
 
     public StoveMenu(int containerId, Inventory playerInventory, CraftingContainer container, ContainerData containerData) {
-        super(CFMenus.STOVE_MENU.get(), containerId);
+        super(CFMenus.Cooking.STOVE_MENU.get(), containerId);
         this.playerInventory = playerInventory;
         this.container = container;
         this.containerData = containerData;

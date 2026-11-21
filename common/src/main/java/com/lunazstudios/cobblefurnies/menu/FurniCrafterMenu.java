@@ -97,6 +97,7 @@ public class FurniCrafterMenu extends AbstractContainerMenu {
         this.availableRecipes = level.getRecipeManager()
                 .getAllRecipesFor(CFRecipes.FURNI_CRAFTING_RECIPE_TYPE)
                 .stream()
+                .filter(holder -> holder.value().getResult().isItemEnabled(level.enabledFeatures()))
                 .sorted(Comparator.comparing(RecipeHolder::id))
                 .collect(Collectors.toList());
     }

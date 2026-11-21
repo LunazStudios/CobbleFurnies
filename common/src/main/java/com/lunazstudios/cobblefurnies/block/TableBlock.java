@@ -33,6 +33,25 @@ public class TableBlock extends Block implements SimpleWaterloggedBlock {
     protected static final VoxelShape LEG_3 = Block.box(0.0D, 0.0D, 14.0D, 2.0D, 14.0D, 16.0D);
     protected static final VoxelShape LEG_4 = Block.box(0.0D, 0.0D, 0.0D, 2.0D, 14.0D, 2.0D);
 
+    private static final int NORTH_BIT = 1;
+    private static final int EAST_BIT = 2;
+    private static final int SOUTH_BIT = 4;
+    private static final int WEST_BIT = 8;
+    private static final VoxelShape[] SHAPES = createShapes();
+
+    private static VoxelShape[] createShapes() {
+        VoxelShape[] shapes = new VoxelShape[16];
+        for (int connections = 0; connections < shapes.length; connections++) {
+            VoxelShape shape = TOP;
+            if ((connections & (EAST_BIT | NORTH_BIT)) == 0) shape = Shapes.or(shape, LEG_1);
+            if ((connections & (EAST_BIT | SOUTH_BIT)) == 0) shape = Shapes.or(shape, LEG_2);
+            if ((connections & (WEST_BIT | SOUTH_BIT)) == 0) shape = Shapes.or(shape, LEG_3);
+            if ((connections & (WEST_BIT | NORTH_BIT)) == 0) shape = Shapes.or(shape, LEG_4);
+            shapes[connections] = shape;
+        }
+        return shapes;
+    }
+
     public TableBlock(Properties properties) {
         super(properties);
         registerDefaultState(this.stateDefinition.any()
@@ -45,19 +64,12 @@ public class TableBlock extends Block implements SimpleWaterloggedBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        VoxelShape shape = TOP;
-
-        boolean north = state.getValue(NORTH);
-        boolean south = state.getValue(SOUTH);
-        boolean east = state.getValue(EAST);
-        boolean west = state.getValue(WEST);
-
-        if (!east && !north) shape = Shapes.or(shape, LEG_1);
-        if (!east && !south) shape = Shapes.or(shape, LEG_2);
-        if (!west && !south) shape = Shapes.or(shape, LEG_3);
-        if (!west && !north) shape = Shapes.or(shape, LEG_4);
-
-        return shape;
+        int connections = 0;
+        if (state.getValue(NORTH)) connections |= NORTH_BIT;
+        if (state.getValue(EAST)) connections |= EAST_BIT;
+        if (state.getValue(SOUTH)) connections |= SOUTH_BIT;
+        if (state.getValue(WEST)) connections |= WEST_BIT;
+        return SHAPES[connections];
     }
     @Nullable
     @Override

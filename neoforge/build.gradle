@@ -66,7 +66,9 @@ dependencies {
 
     modImplementation "earth.terrarium.athena:athena-neoforge-1.21.1:${athena_version}"
     modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
-    modImplementation "com.cobblemon:neoforge:${project.cobblemon_version}"
+    if (!providers.gradleProperty("withoutCobblemon").isPresent()) {
+        modImplementation "com.cobblemon:neoforge:${project.cobblemon_version}"
+    }
 
     modImplementation "thedarkcolour:kotlinforforge-neoforge:${project.kotlin_for_forge_version}"
     forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.kotlin_runtime_version"
@@ -98,3 +100,5 @@ remapJar {
     input.set shadowJar.archiveFile
     destinationDirectory.set(rootProject.file("builds/neoforge"))
 }
+
+apply from: rootProject.file('gradle/client-runs.gradle')

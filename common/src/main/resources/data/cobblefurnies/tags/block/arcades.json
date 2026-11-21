@@ -1,0 +1,6 @@
+{
+    "values": [
+        {"id": "cobblefurnies:porygon_arcade", "required": false},
+        {"id": "cobblefurnies:bulbasaur_arcade", "required": false}
+    ]
+}

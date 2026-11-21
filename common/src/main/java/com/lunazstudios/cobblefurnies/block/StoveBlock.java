@@ -1,29 +1,21 @@
 package com.lunazstudios.cobblefurnies.block;
 
-import com.lunazstudios.cobblefurnies.block.entity.StoveBlockEntity;
+import com.lunazstudios.cobblefurnies.block.entity.DecorativeStoveBlockEntity;
 import com.lunazstudios.cobblefurnies.block.properties.CFBlockStateProperties;
+import com.lunazstudios.cobblefurnies.compat.CobblemonCompat;
 import com.lunazstudios.cobblefurnies.registry.CFBlockEntityTypes;
 import com.lunazstudios.cobblefurnies.registry.CFBlockTags;
-import com.lunazstudios.cobblefurnies.util.block.ShapeUtil;
+import com.lunazstudios.cobblefurnies.util.block.ConnectedCounterShapes;
 import com.lunazstudios.cobblefurnies.util.item.PotColor;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.*;
-import net.minecraft.world.entity.monster.piglin.PiglinAi;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -31,14 +23,17 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public class StoveBlock extends BaseEntityBlock {
-    public static final MapCodec<StoveBlock> CODEC = simpleCodec(StoveBlock::new);
+    public static final MapCodec<StoveBlock> CODEC = simpleCodec(StoveBlock::create);
     public MapCodec<StoveBlock> codec() {
         return CODEC;
     }
@@ -55,26 +50,7 @@ public class StoveBlock extends BaseEntityBlock {
             Block.box(4, 16.5, 8, 12, 18.5, 8),
             Block.box(4, 16.5, 8, 12, 18.5, 8)
     );
-    protected static final VoxelShape TOP_SHAPE_EAST = ShapeUtil.rotateShape(TOP_SHAPE_NORTH, Direction.EAST);
-    protected static final VoxelShape TOP_SHAPE_SOUTH = ShapeUtil.rotateShape(TOP_SHAPE_NORTH, Direction.SOUTH);
-    protected static final VoxelShape TOP_SHAPE_WEST = ShapeUtil.rotateShape(TOP_SHAPE_NORTH, Direction.WEST);
-
-    protected static final VoxelShape BOTTOM_SELF_SHAPE = Block.box(1, 0, 1, 15, 11, 15);
-
-    protected static final VoxelShape BOTTOM_MIDDLE_SHAPE_NORTH = Block.box(0, 0, 1, 16, 11, 15);
-    protected static final VoxelShape BOTTOM_MIDDLE_SHAPE_EAST = ShapeUtil.rotateShape(BOTTOM_MIDDLE_SHAPE_NORTH, Direction.EAST);
-    protected static final VoxelShape BOTTOM_MIDDLE_SHAPE_SOUTH = ShapeUtil.rotateShape(BOTTOM_MIDDLE_SHAPE_NORTH, Direction.SOUTH);
-    protected static final VoxelShape BOTTOM_MIDDLE_SHAPE_WEST = ShapeUtil.rotateShape(BOTTOM_MIDDLE_SHAPE_NORTH, Direction.WEST);
-
-    protected static final VoxelShape BOTTOM_RIGHT_SHAPE_NORTH = Block.box(1, 0, 1, 16, 11, 15);
-    protected static final VoxelShape BOTTOM_RIGHT_SHAPE_EAST = ShapeUtil.rotateShape(BOTTOM_RIGHT_SHAPE_NORTH, Direction.EAST);
-    protected static final VoxelShape BOTTOM_RIGHT_SHAPE_SOUTH = ShapeUtil.rotateShape(BOTTOM_RIGHT_SHAPE_NORTH, Direction.SOUTH);
-    protected static final VoxelShape BOTTOM_RIGHT_SHAPE_WEST = ShapeUtil.rotateShape(BOTTOM_RIGHT_SHAPE_NORTH, Direction.WEST);
-
-    protected static final VoxelShape BOTTOM_LEFT_SHAPE_NORTH = Block.box(0, 0, 1, 15, 11, 15);
-    protected static final VoxelShape BOTTOM_LEFT_SHAPE_EAST = ShapeUtil.rotateShape(BOTTOM_LEFT_SHAPE_NORTH, Direction.EAST);
-    protected static final VoxelShape BOTTOM_LEFT_SHAPE_SOUTH = ShapeUtil.rotateShape(BOTTOM_LEFT_SHAPE_NORTH, Direction.SOUTH);
-    protected static final VoxelShape BOTTOM_LEFT_SHAPE_WEST = ShapeUtil.rotateShape(BOTTOM_LEFT_SHAPE_NORTH, Direction.WEST);
+    private static final ConnectedCounterShapes SHAPES = new ConnectedCounterShapes(TOP_SHAPE_NORTH);
 
     public StoveBlock(Properties properties) {
         super(properties);
@@ -89,179 +65,32 @@ public class StoveBlock extends BaseEntityBlock {
                 .setValue(CFBlockStateProperties.POT_COLOR, PotColor.RED));
     }
 
-    @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
-
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (!(blockEntity instanceof StoveBlockEntity stoveBE)) return InteractionResult.PASS;
-
-        if (state.getValue(CFBlockStateProperties.HAS_POT)) {
-            if (player.isShiftKeyDown()) {
-                PotColor color = state.getValue(CFBlockStateProperties.POT_COLOR);
-                ItemStack potStack = new ItemStack(color.getItem());
-
-                Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, potStack);
-
-                level.setBlock(pos, state
-                        .setValue(CFBlockStateProperties.HAS_POT, false), 3);
-
-                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 1.2f);
-                return InteractionResult.CONSUME;
-            }
-
-            player.openMenu(stoveBE);
-            PiglinAi.angerNearbyPiglins(player, true);
-            return InteractionResult.CONSUME;
-        }
-
-        player.displayClientMessage(Component.translatable("gui.cobblefurnies.add_campfire_pot"), true);
-        return InteractionResult.SUCCESS;
-    }
-    @Override
-    protected ItemInteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (level.isClientSide) return ItemInteractionResult.SUCCESS;
-
-        if (!(level.getBlockEntity(pos) instanceof StoveBlockEntity)) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-
-        if (state.getValue(CFBlockStateProperties.HAS_POT)) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-
-        PotColor color = PotColor.fromItem(itemStack.getItem());
-        if (color == null) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-
-        if (!player.isCreative()) {
-            itemStack.shrink(1);
-        }
-
-        BlockState newState = state
-                .setValue(CFBlockStateProperties.HAS_POT, true)
-                .setValue(CFBlockStateProperties.POT_COLOR, color);
-
-        level.setBlock(pos, newState, 3);
-
-        level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1f, 1f);
-
-        return ItemInteractionResult.SUCCESS;
+    public static StoveBlock create(Properties properties) {
+        return CobblemonCompat.LOADED ? new CookingStoveBlock(properties) : new StoveBlock(properties);
     }
 
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide
-                ? BaseEntityBlock.createTickerHelper(type, CFBlockEntityTypes.STOVE.get(), StoveBlockEntity::clientTick)
-                : BaseEntityBlock.createTickerHelper(type, CFBlockEntityTypes.STOVE.get(), StoveBlockEntity::serverTick);
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (state.is(newState.getBlock())) return;
-
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof StoveBlockEntity stoveBE) {
-            stoveBE.handleSafeDrop();
-            Containers.dropContents(level, pos, stoveBE);
-            level.updateNeighbourForOutputSignal(pos, this);
-        }
-
-        super.onRemove(state, level, pos, newState, isMoving);
-    }
-
-    @Override
-    public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
-        super.playerDestroy(level, player, pos, state, blockEntity, tool);
-
-        if (!level.isClientSide && state.getValue(CFBlockStateProperties.HAS_POT)) {
-            PotColor color = state.getValue(CFBlockStateProperties.POT_COLOR);
-            ItemStack potStack = new ItemStack(color.getItem());
-
-            Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, potStack);
-        }
-    }
-
-    @Nullable
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new StoveBlockEntity(pos, state);
+        return CFBlockEntityTypes.STOVE.get().create(pos, state);
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        List<ItemStack> drops = super.getDrops(state, params);
+        if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof DecorativeStoveBlockEntity stove) {
+            for (ItemStack drop : drops) {
+                if (drop.is(asItem())) {
+                    stove.preserveContents(drop);
+                    break;
+                }
+            }
+        }
+        return drops;
     }
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        Direction facing = state.getValue(FACING);
-        boolean connectedLeft = state.getValue(CONNECTED_LEFT);
-        boolean connectedRight = state.getValue(CONNECTED_RIGHT);
-
-        VoxelShape topShape;
-        VoxelShape bottomShape;
-
-        switch (facing) {
-            case EAST:
-                topShape = TOP_SHAPE_EAST;
-                break;
-            case SOUTH:
-                topShape = TOP_SHAPE_SOUTH;
-                break;
-            case WEST:
-                topShape = TOP_SHAPE_WEST;
-                break;
-            default:
-                topShape = TOP_SHAPE_NORTH;
-                break;
-        }
-
-        if (connectedLeft && connectedRight) {
-            switch (facing) {
-                case EAST:
-                    bottomShape = BOTTOM_MIDDLE_SHAPE_EAST;
-                    break;
-                case SOUTH:
-                    bottomShape = BOTTOM_MIDDLE_SHAPE_SOUTH;
-                    break;
-                case WEST:
-                    bottomShape = BOTTOM_MIDDLE_SHAPE_WEST;
-                    break;
-                default:
-                    bottomShape = BOTTOM_MIDDLE_SHAPE_NORTH;
-                    break;
-            }
-        } else if (connectedLeft) {
-            switch (facing) {
-                case EAST:
-                    bottomShape = BOTTOM_LEFT_SHAPE_EAST;
-                    break;
-                case SOUTH:
-                    bottomShape = BOTTOM_LEFT_SHAPE_SOUTH;
-                    break;
-                case WEST:
-                    bottomShape = BOTTOM_LEFT_SHAPE_WEST;
-                    break;
-                default:
-                    bottomShape = BOTTOM_LEFT_SHAPE_NORTH;
-                    break;
-            }
-        } else if (connectedRight) {
-            switch (facing) {
-                case EAST:
-                    bottomShape = BOTTOM_RIGHT_SHAPE_EAST;
-                    break;
-                case SOUTH:
-                    bottomShape = BOTTOM_RIGHT_SHAPE_SOUTH;
-                    break;
-                case WEST:
-                    bottomShape = BOTTOM_RIGHT_SHAPE_WEST;
-                    break;
-                default:
-                    bottomShape = BOTTOM_RIGHT_SHAPE_NORTH;
-                    break;
-            }
-        } else {
-            bottomShape = BOTTOM_SELF_SHAPE;
-        }
-
-        return Shapes.or(topShape, bottomShape);
+        return SHAPES.get(state.getValue(FACING), state.getValue(CONNECTED_LEFT), state.getValue(CONNECTED_RIGHT));
     }
 
     @Nullable

@@ -1,0 +1,7 @@
+{
+    "parent": "cobblefurnies:block/arcade/button_2",
+    "textures": {
+        "0": "cobblefurnies:block/arcade/porygon",
+        "particle": "cobblefurnies:block/arcade/porygon"
+    }
+}
