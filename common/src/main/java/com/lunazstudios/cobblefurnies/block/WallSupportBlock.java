@@ -6,12 +6,12 @@ import com.lunazstudios.cobblefurnies.registry.CFBlockTags;
 import com.lunazstudios.cobblefurnies.util.block.ShapeUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -95,12 +95,13 @@ public class WallSupportBlock extends FurnitureHorizontalBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState blockState2, LevelAccessor level, BlockPos pos, BlockPos blockPos2) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos,
+                                  Direction direction, BlockPos blockPos2, BlockState blockState2, RandomSource random) {
         Direction facing = state.getValue(FACING);
         if (direction.getAxis().isHorizontal()) {
             return state.setValue(CFBlockStateProperties.WALL_SUPPORT_SHAPE, getWallSupportShape(level, pos, facing));
         }
-        return super.updateShape(state, direction, blockState2, level, pos, blockPos2);
+        return super.updateShape(state, level, ticks, pos, direction, blockPos2, blockState2, random);
     }
 
     private WallSupportShape getWallSupportShape(BlockGetter level, BlockPos pos, Direction facing) {

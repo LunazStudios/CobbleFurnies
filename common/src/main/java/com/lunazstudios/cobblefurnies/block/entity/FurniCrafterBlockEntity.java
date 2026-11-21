@@ -17,6 +17,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 public class FurniCrafterBlockEntity extends BlockEntity implements MenuProvider {
@@ -37,15 +39,21 @@ public class FurniCrafterBlockEntity extends BlockEntity implements MenuProvider
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        ContainerHelper.saveAllItems(tag, outputContainer.getItems(), registries);
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        if (level != null) net.minecraft.world.Containers.dropContents(level, pos, outputContainer);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        ContainerHelper.loadAllItems(tag, outputContainer.getItems(), registries);
+    protected void saveAdditional(ValueOutput tag) {
+        super.saveAdditional(tag);
+        ContainerHelper.saveAllItems(tag, outputContainer.getItems());
+    }
+
+    @Override
+    protected void loadAdditional(ValueInput tag) {
+        super.loadAdditional(tag);
+        ContainerHelper.loadAllItems(tag, outputContainer.getItems());
     }
 
     @Nullable

@@ -1,11 +1,11 @@
 package com.lunazstudios.cobblefurnies.network.message;
 
+import com.lunazstudios.cobblefurnies.client.screen.FurniCrafterScreen;
+import com.lunazstudios.cobblefurnies.menu.FurniCrafterMenu;
 import com.lunazstudios.cobblefurnies.network.CFNetwork;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import com.lunazstudios.cobblefurnies.menu.FurniCrafterMenu;
-import com.lunazstudios.cobblefurnies.client.screen.FurniCrafterScreen;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
@@ -35,7 +35,7 @@ public record SyncCraftableRecipesMessage(int containerId, boolean[] craftable) 
             if (Minecraft.getInstance().player.containerMenu instanceof FurniCrafterMenu menu &&
                     menu.containerId == message.containerId) {
                 menu.setCraftableRecipes(message.craftable);
-                if (Minecraft.getInstance().screen instanceof FurniCrafterScreen screen) {
+                if (Minecraft.getInstance().gui.screen() instanceof FurniCrafterScreen screen) {
                     screen.updateRecipeButtons();
                 }
             }

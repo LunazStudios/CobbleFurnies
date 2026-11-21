@@ -2,35 +2,32 @@ package com.lunazstudios.cobblefurnies.client.screen;
 
 import com.lunazstudios.cobblefurnies.CobbleFurnies;
 import com.lunazstudios.cobblefurnies.menu.FurniCrafterMenu;
-import com.lunazstudios.cobblefurnies.mixin.client.GuiGraphicsInvoker;
-import com.lunazstudios.cobblefurnies.network.CFNetwork;
 import com.lunazstudios.cobblefurnies.network.message.CraftRecipeMessage;
 import com.lunazstudios.cobblefurnies.recipe.CountedIngredient;
 import com.lunazstudios.cobblefurnies.recipe.FurniCraftingRecipe;
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.architectury.networking.NetworkManager;
-import io.netty.buffer.Unpooled;
+import java.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import org.lwjgl.glfw.GLFW;
-
-import java.util.*;
 
 public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu> {
-    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(CobbleFurnies.MOD_ID, "textures/gui/container/furnicrafter.png");
+    public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(CobbleFurnies.MOD_ID, "textures/gui/container/furnicrafter.png");
 
     private static final int RECIPES_PER_ROW = 6;
     private static final int BUTTON_SIZE = 20;
@@ -40,7 +37,8 @@ public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu
     private static final int WINDOW_HEIGHT = 88;
     private static final int SCROLL_SPEED = 10;
     private static final int SCROLLBAR_HEIGHT = 15;
-    private static final int SCROLLBAR_AREA = 88;
+    private static final int SCROLLBAR_WIDTH = 12;
+    private static final int HANDLE_TRAVEL = WINDOW_HEIGHT - SCROLLBAR_HEIGHT;
 
     private static final int SCROLLBAR_TEXTURE_ENABLED_X = 176;
     private static final int SCROLLBAR_TEXTURE_DISABLED_X = 188;
@@ -54,14 +52,11 @@ public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu
     private EditBox searchBox;
     private double scroll = 0;
     private int hoveredRecipeIndex = -1;
-    private int clickedY = -1;
-    private int scrollbarDragOffset = 0;
+    private double scrollbarDragOffset = -1;
     private String lastQuery = "";
 
     public FurniCrafterScreen(FurniCrafterMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        this.imageWidth = 176;
-        this.imageHeight = 204;
+        super(menu, inventory, title, 176, 204);
         this.inventoryLabelY = 110;
         updateRecipes();
     }
@@ -69,6 +64,7 @@ public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu
     @Override
     protected void init() {
         super.init();
+        scrollbarDragOffset = -1;
 
         int x = this.leftPos + 80;
         int y = this.topPos + 5;
@@ -113,7 +109,7 @@ public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu
             String q = query;
             this.visibleRecipes = this.allRecipes.stream()
                     .filter(holder -> holder.value()
-                            .getResultItem(null)
+                            .getResult()
                             .getHoverName()
                             .getString()
                             .toLowerCase(Locale.ROOT)
@@ -123,25 +119,24 @@ public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-        this.renderTooltip(graphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         if (hoveredRecipeIndex != -1 && isMouseWithinBounds(mouseX, mouseY, leftPos + GRID_X_OFFSET, topPos + GRID_Y_OFFSET, WINDOW_WIDTH, WINDOW_HEIGHT)) {
             renderRecipeTooltip(graphics, mouseX, mouseY, hoveredRecipeIndex);
         }
     }
 
-    private void renderRecipeTooltip(GuiGraphics graphics, int mouseX, int mouseY, int recipeIndex) {
+    private void renderRecipeTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int recipeIndex) {
         RecipeHolder<FurniCraftingRecipe> holder = visibleRecipes.get(recipeIndex);
         FurniCraftingRecipe recipe = holder.value();
 
         List<ClientTooltipComponent> components = new ArrayList<>();
         components.add(new ClientTextTooltip(
-                recipe.getResultItem(null).getHoverName().getVisualOrderText()
+                recipe.getResult().getHoverName().getVisualOrderText()
         ));
 
-        if (!Screen.hasShiftDown()) {
+        if (!Minecraft.getInstance().hasShiftDown()) {
             components.add(new ClientFurnicrafterRecipeTooltip(menu, recipe));
             components.add(new ClientTextTooltip(
                     Component.translatable("gui.cobblefurnies.hold_shift_for_details")
@@ -155,18 +150,18 @@ public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu
             }
         }
 
-        ((GuiGraphicsInvoker) graphics)
-                .invokeRenderTooltipInternal(this.font, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
+        graphics.tooltip(this.font, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null, false);
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-        graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
         renderRecipes(graphics, mouseX, mouseY);
         renderScrollbar(graphics);
+        super.extractContents(graphics, mouseX, mouseY, partialTicks);
     }
 
-    private void renderRecipes(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void renderRecipes(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         hoveredRecipeIndex = -1;
         int clipX = leftPos + GRID_X_OFFSET;
         int clipY = topPos + GRID_Y_OFFSET;
@@ -191,8 +186,8 @@ public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu
 
             int textureU = 176 + (!canCraft ? BUTTON_SIZE : 0);
             int textureV = 0;
-            graphics.blit(TEXTURE, x, y, textureU, textureV, BUTTON_SIZE, BUTTON_SIZE, 256, 256);
-            graphics.renderFakeItem(recipe.getResultItem(null), x + 2, y + 2);
+            graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, textureU, textureV, BUTTON_SIZE, BUTTON_SIZE, 256, 256);
+            graphics.fakeItem(recipe.getResult(), x + 2, y + 2);
 
             if (mouseInGrid && mouseX >= x && mouseX < x + BUTTON_SIZE && mouseY >= y && mouseY < y + BUTTON_SIZE) {
                 hoveredRecipeIndex = i;
@@ -201,14 +196,27 @@ public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu
         graphics.disableScissor();
     }
 
-    private void renderScrollbar(GuiGraphics graphics) {
+    private void renderScrollbar(GuiGraphicsExtractor graphics) {
         int maxScroll = getMaxScroll();
-        int scrollbarX = leftPos + GRID_X_OFFSET + WINDOW_WIDTH + 3;
-        int scrollbarY = topPos + GRID_Y_OFFSET - Y_OFFSET_CORRECTION;
-        int trackHeight = SCROLLBAR_AREA - SCROLLBAR_HEIGHT;
-        int currentHandlePos = maxScroll > 0 ? (int) ((scroll / (double) maxScroll) * trackHeight) : 0;
         int textureX = maxScroll > 0 ? SCROLLBAR_TEXTURE_ENABLED_X : SCROLLBAR_TEXTURE_DISABLED_X;
-        graphics.blit(TEXTURE, scrollbarX, scrollbarY + currentHandlePos, textureX, SCROLLBAR_TEXTURE_Y, 12, SCROLLBAR_HEIGHT, 256, 256);
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, TEXTURE, scrollbarX(), handleY(maxScroll), textureX, SCROLLBAR_TEXTURE_Y, SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT, 256, 256);
+    }
+
+    private int scrollbarX() {
+        return leftPos + GRID_X_OFFSET + WINDOW_WIDTH + 3;
+    }
+
+    private int scrollbarY() {
+        return topPos + GRID_Y_OFFSET - Y_OFFSET_CORRECTION;
+    }
+
+    private int handleY(int maxScroll) {
+        return scrollbarY() + (maxScroll > 0 ? (int) (scroll / maxScroll * HANDLE_TRAVEL) : 0);
+    }
+
+    private void scrollToMouse(double mouseY) {
+        double fraction = (mouseY - scrollbarY() - scrollbarDragOffset) / HANDLE_TRAVEL;
+        scroll = Mth.clamp(fraction, 0.0, 1.0) * getMaxScroll();
     }
 
     private int getMaxScroll() {
@@ -221,97 +229,104 @@ public class FurniCrafterScreen extends AbstractContainerScreen<FurniCrafterMenu
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-            if (hoveredRecipeIndex != -1) {
-                int amount = getRequestedAmount();
-                craftItem(hoveredRecipeIndex, amount);
-                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+            int maxScroll = getMaxScroll();
+            if (isMouseWithinBounds(mouseX, mouseY, scrollbarX(), scrollbarY(), SCROLLBAR_WIDTH, WINDOW_HEIGHT)) {
+                if (maxScroll > 0) {
+                    double offset = mouseY - handleY(maxScroll);
+                    if (offset >= 0 && offset < SCROLLBAR_HEIGHT) {
+                        scrollbarDragOffset = offset;
+                    } else {
+                        scrollbarDragOffset = SCROLLBAR_HEIGHT / 2.0;
+                        scrollToMouse(mouseY);
+                    }
+                }
                 return true;
             }
-            int scrollbarX = leftPos + GRID_X_OFFSET + WINDOW_WIDTH + 3;
-            int scrollbarY = topPos + GRID_Y_OFFSET - Y_OFFSET_CORRECTION;
-            int maxScroll = getMaxScroll();
-            int trackHeight = SCROLLBAR_AREA - SCROLLBAR_HEIGHT;
-            int currentHandlePos = maxScroll > 0 ? (int) ((scroll / (double) maxScroll) * trackHeight) : 0;
-            if (isMouseWithinBounds(mouseX, mouseY, scrollbarX, scrollbarY + currentHandlePos, 12, SCROLLBAR_HEIGHT)) {
-                scrollbarDragOffset = (int) mouseY - (scrollbarY + currentHandlePos);
-                clickedY = (int) mouseY;
-                return true;
+            int gridX = leftPos + GRID_X_OFFSET;
+            int gridY = topPos + GRID_Y_OFFSET;
+            if (isMouseWithinBounds(mouseX, mouseY, gridX, gridY, WINDOW_WIDTH, WINDOW_HEIGHT)) {
+                int column = (int) (mouseX - gridX) / BUTTON_SIZE;
+                int row = (int) (mouseY - gridY + (int) scroll + Y_OFFSET_CORRECTION) / BUTTON_SIZE;
+                int index = row * RECIPES_PER_ROW + column;
+                if (index < visibleRecipes.size()) {
+                    craftItem(index, getRequestedAmount());
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    return true;
+                }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (this.searchBox != null && this.searchBox.isFocused()) {
 
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if (event.key() == InputConstants.KEY_ESCAPE) {
                 this.searchBox.setFocused(false);
                 return true;
             }
 
             if (this.minecraft != null
                     && this.minecraft.options != null
-                    && this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+                    && this.minecraft.options.keyInventory.matches(event)) {
                 return true;
             }
 
-            if (this.searchBox.keyPressed(keyCode, scanCode, modifiers)) {
+            if (this.searchBox.keyPressed(event)) {
                 return true;
             }
 
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean charTyped(char codePoint, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (this.searchBox != null && this.searchBox.isFocused()) {
-            if (this.searchBox.charTyped(codePoint, modifiers)) {
+            if (this.searchBox.charTyped(event)) {
                 return true;
             }
         }
-        return super.charTyped(codePoint, modifiers);
+        return super.charTyped(event);
     }
 
     private int getRequestedAmount() {
-        if (Screen.hasShiftDown()) {
+        if (Minecraft.getInstance().hasShiftDown()) {
             return 64;
-        } else if (Screen.hasControlDown()) {
+        } else if (Minecraft.getInstance().hasControlDown()) {
             return 16;
         }
         return 1;
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (clickedY != -1) {
-            int scrollbarY = topPos + GRID_Y_OFFSET - Y_OFFSET_CORRECTION;
-            int trackHeight = SCROLLBAR_AREA - SCROLLBAR_HEIGHT;
-            int newHandlePos = (int) mouseY - scrollbarY - scrollbarDragOffset;
-            newHandlePos = Mth.clamp(newHandlePos, 0, trackHeight);
-            scroll = (newHandlePos / (double) trackHeight) * getMaxScroll();
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && scrollbarDragOffset >= 0) {
+            scrollToMouse(event.y());
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && clickedY != -1) {
-            clickedY = -1;
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && scrollbarDragOffset >= 0) {
+            scrollbarDragOffset = -1;
             return true;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
-        if (clickedY == -1 && isMouseWithinBounds(mouseX, mouseY, leftPos + GRID_X_OFFSET, topPos + GRID_Y_OFFSET, WINDOW_WIDTH + 15, WINDOW_HEIGHT)) {
+        if (scrollbarDragOffset < 0 && isMouseWithinBounds(mouseX, mouseY, leftPos + GRID_X_OFFSET, topPos + GRID_Y_OFFSET, WINDOW_WIDTH + 15, WINDOW_HEIGHT)) {
             scroll = Mth.clamp(scroll - deltaY * SCROLL_SPEED, 0, getMaxScroll());
             return true;
         }

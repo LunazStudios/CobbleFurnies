@@ -1,8 +1,6 @@
 package com.lunazstudios.cobblefurnies.fabric.compat;
 
-import com.lunazstudios.cobblefurnies.recipe.FurniCraftingRecipe;
 import com.lunazstudios.cobblefurnies.registry.CFBlocks;
-import com.lunazstudios.cobblefurnies.registry.CFRecipes;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
@@ -19,7 +17,6 @@ public class CobbleFurniesREIClient implements REIClientPlugin {
 
     @Override
     public void registerDisplays(DisplayRegistry registry) {
-        registry.registerRecipeFiller(FurniCraftingRecipe.class, CFRecipes.FURNI_CRAFTING_RECIPE_TYPE,
-                FurniCrafterDisplay::new);
+        com.lunazstudios.cobblefurnies.recipe.FurniRecipes.onClient().forEach(holder -> registry.add(new FurniCrafterDisplay(holder)));
     }
 }

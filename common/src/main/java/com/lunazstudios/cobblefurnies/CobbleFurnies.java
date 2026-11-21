@@ -2,7 +2,7 @@ package com.lunazstudios.cobblefurnies;
 
 import com.lunazstudios.cobblefurnies.network.CFNetwork;
 import com.lunazstudios.cobblefurnies.registry.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class CobbleFurnies {
     public static final String MOD_ID = "cobblefurnies";
@@ -19,7 +19,7 @@ public final class CobbleFurnies {
         CFSoundEvents.init();
     }
 
-    public static ResourceLocation id(String name) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
+    public static Identifier id(String name) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, name);
     }
 }

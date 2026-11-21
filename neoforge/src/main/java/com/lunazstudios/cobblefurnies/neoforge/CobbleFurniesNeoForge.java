@@ -2,8 +2,6 @@ package com.lunazstudios.cobblefurnies.neoforge;
 
 import com.lunazstudios.cobblefurnies.CobbleFurnies;
 import com.lunazstudios.cobblefurnies.client.screen.FurniCrafterScreen;
-import com.lunazstudios.cobblefurnies.compat.CobblemonCompat;
-import com.lunazstudios.cobblefurnies.client.screen.StoveScreen;
 import com.lunazstudios.cobblefurnies.registry.CFMenus;
 import com.lunazstudios.cobblefurnies.registry.neoforge.CFRegistryImpl;
 import com.lunazstudios.cobblefurnies.registry.neoforge.CFTabsImpl;
@@ -30,20 +28,12 @@ public final class CobbleFurniesNeoForge {
         CFTabsImpl.register(bus);
     }
 
-    @EventBusSubscriber(modid = CobbleFurnies.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = CobbleFurnies.MOD_ID, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(CFMenus.FURNI_CRAFTER_MENU.get(), FurniCrafterScreen::new);
-            if (CobblemonCompat.LOADED) {
-                CookingScreens.register(event);
-            }
         }
     }
 
-    private static final class CookingScreens {
-        static void register(RegisterMenuScreensEvent event) {
-            event.register(CFMenus.Cooking.STOVE_MENU.get(), StoveScreen::new);
-        }
-    }
 }

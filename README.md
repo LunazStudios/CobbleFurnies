@@ -22,7 +22,7 @@
 
 **Can I play without Cobblemon?**
 
-Yes. Cobblemon inspired the mod and is optional as of version 1.2.1. You can furnish your builds with the regular furniture, wool, and carpets, and use stoves as decoration. Installing Cobblemon also lets you cook on stoves and craft Pokémon statues, Poké Ball furniture, and the Apricorn and Saccharine sets.
+Yes. Cobblemon inspired the original furniture collection. On Minecraft 26.3, the regular furniture, wool, and carpets are available on their own, and stoves are decorative. Pokémon-themed furniture and stove cooking are available in the Minecraft 1.21.1 edition with Cobblemon installed.
 
 **Q: Can I use this mod in my modpack or create content with it?** 
 **A:** Absolutely! You're welcome to include **CobbleFurnies** in your modpack or feature it in your videos. Just remember to credit the mod appropriately and avoid claiming it as your own work.

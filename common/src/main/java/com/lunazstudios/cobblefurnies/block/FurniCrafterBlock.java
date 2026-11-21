@@ -1,9 +1,9 @@
 package com.lunazstudios.cobblefurnies.block;
 
 import com.lunazstudios.cobblefurnies.block.entity.FurniCrafterBlockEntity;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,18 +16,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class FurniCrafterBlock extends BaseEntityBlock {
-    public static final MapCodec<FurniCrafterBlock> CODEC = simpleCodec(FurniCrafterBlock::new);
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
 
     public FurniCrafterBlock(Properties properties) {
         super(properties);
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack pStack, BlockState pState, Level pLevel, BlockPos pPos,
+    protected InteractionResult useItemOn(ItemStack pStack, BlockState pState, Level pLevel, BlockPos pPos,
                                               Player pPlayer, InteractionHand pHand, BlockHitResult pHitResult) {
         if (!pLevel.isClientSide()) {
             BlockEntity entity = pLevel.getBlockEntity(pPos);
@@ -38,7 +33,7 @@ public class FurniCrafterBlock extends BaseEntityBlock {
             }
         }
 
-        return ItemInteractionResult.sidedSuccess(pLevel.isClientSide());
+        return pLevel.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
     @Override
@@ -47,23 +42,9 @@ public class FurniCrafterBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (!state.is(newState.getBlock())) { 
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof FurniCrafterBlockEntity furniCrafterBE) {
-                SimpleContainer container = furniCrafterBE.getOutputContainer();
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
 
-                for (int i = 0; i < container.getContainerSize(); i++) {
-                    ItemStack stack = container.getItem(i);
-                    if (!stack.isEmpty()) {
-                        Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
-                    }
-                }
-
-                level.removeBlockEntity(pos);
-            }
-        }
-        super.onRemove(state, level, pos, newState, isMoving);
+        level.updateNeighbourForOutputSignal(pos, this);
     }
 
     public RenderShape getRenderShape(BlockState state) {

@@ -2,12 +2,8 @@
     "type": "minecraft:crafting_shapeless",
     "category": "building",
     "ingredients": [
-        {
-            "item": "cobblefurnies:light_fridge"
-        },
-        {
-            "item": "minecraft:black_dye"
-        }
+        "cobblefurnies:light_fridge",
+        "minecraft:black_dye"
     ],
     "result": {
         "count": 1,

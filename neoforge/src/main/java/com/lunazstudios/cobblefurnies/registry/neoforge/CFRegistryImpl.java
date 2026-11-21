@@ -1,22 +1,18 @@
 package com.lunazstudios.cobblefurnies.registry.neoforge;
 
 import com.lunazstudios.cobblefurnies.CobbleFurnies;
-import com.lunazstudios.cobblefurnies.menu.FurniCrafterMenu;
 import com.lunazstudios.cobblefurnies.registry.CFRegistry;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.EntityRenderers;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -32,12 +28,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.function.Supplier;
 
 public class CFRegistryImpl {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(CobbleFurnies.MOD_ID);
@@ -79,11 +69,7 @@ public class CFRegistryImpl {
     }
 
     public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(String name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height) {
-        return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(factory, category).sized(width, height).build(name));
-    }
-
-    public static <T extends Entity> void registerEntityRenderers(Supplier<EntityType<T>> type, EntityRendererProvider<T> renderProvider) {
-        EntityRenderers.register(type.get(), renderProvider);
+        return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(factory, category).sized(width, height).build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, CobbleFurnies.id(name))));
     }
 
     public static <T extends BlockEntityType<E>, E extends BlockEntity> Supplier<T> registerBlockEntityType(String name, Supplier<T> blockEntity) {
@@ -91,11 +77,7 @@ public class CFRegistryImpl {
     }
 
     public static <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(CFRegistry.BlockEntitySupplier<T> blockEntity, Block... validBlocks) {
-        return BlockEntityType.Builder.of(blockEntity::create, validBlocks).build(null);
-    }
-
-    public static <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> type, BlockEntityRendererProvider<T> renderProvider) {
-        BlockEntityRenderers.register(type.get(), renderProvider);
+        return new BlockEntityType<>(blockEntity::create, java.util.Set.of(validBlocks));
     }
 
     public static boolean isFakePlayer(Player player) {

@@ -1,20 +1,19 @@
 package com.lunazstudios.cobblefurnies.client.sound;
 
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.resources.ResourceLocation;
-
-import java.util.HashMap;
-import java.util.Map;
+import net.minecraft.resources.Identifier;
 
 public abstract class SoundTracker<T> {
 
     protected final SoundManager manager = Minecraft.getInstance().getSoundManager();
-    protected final Map<T, Map<ResourceLocation, SoundInstance>> trackedSounds = new HashMap<>();
+    protected final Map<T, Map<Identifier, SoundInstance>> trackedSounds = new HashMap<>();
 
-    public boolean isActive(T id, ResourceLocation location) {
-        Map<ResourceLocation, SoundInstance> emitter = trackedSounds.get(id);
+    public boolean isActive(T id, Identifier location) {
+        Map<Identifier, SoundInstance> emitter = trackedSounds.get(id);
         if (emitter == null) {
             return false;
         }
@@ -23,21 +22,21 @@ public abstract class SoundTracker<T> {
     }
 
     public void play(T id, SoundInstance sound) {
-        Map<ResourceLocation, SoundInstance> tracks = trackedSounds.computeIfAbsent(id, k -> new HashMap<>());
-        SoundInstance existing = tracks.get(sound.getLocation());
+        Map<Identifier, SoundInstance> tracks = trackedSounds.computeIfAbsent(id, k -> new HashMap<>());
+        SoundInstance existing = tracks.get(sound.getIdentifier());
         if (existing != null) {
             manager.stop(existing);
         }
-        tracks.put(sound.getLocation(), sound);
+        tracks.put(sound.getIdentifier(), sound);
         manager.play(sound);
     }
 
     public void stop(T id, SoundInstance sound) {
-        stop(id, sound.getLocation());
+        stop(id, sound.getIdentifier());
     }
 
-    public void stop(T id, ResourceLocation location) {
-        Map<ResourceLocation, SoundInstance> emitter = trackedSounds.get(id);
+    public void stop(T id, Identifier location) {
+        Map<Identifier, SoundInstance> emitter = trackedSounds.get(id);
         if (emitter == null) {
             return;
         }
@@ -48,7 +47,7 @@ public abstract class SoundTracker<T> {
     }
 
     public void stopAll() {
-        for (Map<ResourceLocation, SoundInstance> tracks : trackedSounds.values()) {
+        for (Map<Identifier, SoundInstance> tracks : trackedSounds.values()) {
             for (SoundInstance sound : tracks.values()) {
                 manager.stop(sound);
             }
@@ -57,7 +56,7 @@ public abstract class SoundTracker<T> {
     }
 
     public void stopAll(T id) {
-        Map<ResourceLocation, SoundInstance> tracks = trackedSounds.get(id);
+        Map<Identifier, SoundInstance> tracks = trackedSounds.get(id);
         if (tracks == null) {
             return;
         }
@@ -67,8 +66,8 @@ public abstract class SoundTracker<T> {
         tracks.clear();
     }
 
-    public SoundInstance get(T id, ResourceLocation location) {
-        Map<ResourceLocation, SoundInstance> emitter = trackedSounds.get(id);
+    public SoundInstance get(T id, Identifier location) {
+        Map<Identifier, SoundInstance> emitter = trackedSounds.get(id);
         if (emitter == null) return null;
         return emitter.get(location);
     }

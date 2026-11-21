@@ -11,8 +11,6 @@
 		{"id": "cobblefurnies:mangrove_wall_support", "required": false},
 		{"id": "cobblefurnies:oak_wall_support", "required": false},
 		{"id": "cobblefurnies:spruce_wall_support", "required": false},
-		{"id": "cobblefurnies:warped_wall_support", "required": false},
-		{"id": "cobblefurnies:apricorn_wall_support", "required": false},
-		{"id": "cobblefurnies:saccharine_wall_support", "required": false}
+		{"id": "cobblefurnies:warped_wall_support", "required": false}
 	]
 }

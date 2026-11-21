@@ -1,30 +1,31 @@
 package com.lunazstudios.cobblefurnies.block;
 
+import java.util.Collections;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Collections;
-import java.util.List;
 
 public class BonsaiPlantBlock extends Block {
     public static final EnumProperty<DoubleBlockHalf> HALF = EnumProperty.create("half", DoubleBlockHalf.class);
@@ -58,7 +59,7 @@ public class BonsaiPlantBlock extends Block {
         BlockPos pos = context.getClickedPos();
         Level level = context.getLevel();
 
-        if (pos.getY() < level.getMaxBuildHeight() - 1 && level.getBlockState(pos.above()).canBeReplaced(context)) {
+        if (pos.getY() < level.getMaxY() && level.getBlockState(pos.above()).canBeReplaced(context)) {
             return this.defaultBlockState().setValue(HALF, DoubleBlockHalf.LOWER);
         }
         return null;
@@ -70,7 +71,7 @@ public class BonsaiPlantBlock extends Block {
     }
 
     @Override
-    public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
+    public void playerDestroy(ServerLevel level, ServerPlayer player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
         DoubleBlockHalf half = blockState.getValue(HALF);
         BlockPos otherHalfPos = half == DoubleBlockHalf.LOWER ? blockPos.above() : blockPos.below();
         BlockState otherHalfState = level.getBlockState(otherHalfPos);
@@ -91,7 +92,8 @@ public class BonsaiPlantBlock extends Block {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos,
+                                  Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         DoubleBlockHalf half = state.getValue(HALF);
 
         if (direction == (half == DoubleBlockHalf.LOWER ? Direction.UP : Direction.DOWN)) {
@@ -101,7 +103,7 @@ public class BonsaiPlantBlock extends Block {
             return Blocks.AIR.defaultBlockState();
         }
 
-        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override

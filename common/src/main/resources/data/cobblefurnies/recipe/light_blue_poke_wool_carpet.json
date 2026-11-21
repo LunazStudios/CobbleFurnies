@@ -3,9 +3,7 @@
     "category": "building",
     "group": "carpet",
     "key": {
-        "C": {
-            "item": "cobblefurnies:light_blue_poke_wool"
-        }
+        "C": "cobblefurnies:light_blue_poke_wool"
     },
     "pattern": [
         "CC"

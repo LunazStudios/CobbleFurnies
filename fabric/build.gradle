@@ -1,6 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow'
-    id 'org.jetbrains.kotlin.jvm' version '2.2.0'
+    id 'com.gradleup.shadow'
 }
 
 architectury {
@@ -26,27 +25,23 @@ configurations {
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    implementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+    implementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
-    modImplementation "earth.terrarium.athena:athena-fabric-1.21.1:${athena_version}"
-    modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
-    if (!providers.gradleProperty("withoutCobblemon").isPresent()) {
-        modImplementation "com.cobblemon:fabric:${project.cobblemon_version}"
-    }
+    implementation "earth.terrarium.athena:athena-fabric-${minecraft_version}:${athena_version}"
+    implementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
 
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_api_fabric}"
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_fabric}"
-    modApi "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
+    compileOnly "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
+    compileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_api_fabric}"
+    runtimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_fabric}"
 
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-    modRuntimeOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}") { transitive false }
+    runtimeOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}") { transitive false }
+    runtimeOnly("net.mezzdev.config:mezz_config-${minecraft_version}-fabric:${mezz_config_version}") { transitive false }
 
-    runtimeOnly "net.fabricmc:fabric-language-kotlin:$rootProject.fabric_kotlin"
-    minecraftServerRuntimeLibraries "com.ibm.icu:icu4j:73.2"
 
-    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
+    common(project(path: ':common')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 }
 
@@ -60,13 +55,12 @@ processResources {
 
 shadowJar {
     configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
-}
-
-remapJar {
-    input.set shadowJar.archiveFile
+    dependsOn jar
+    mainSpec.sourcePaths.clear()
+    from(zipTree(jar.archiveFile))
+    archiveClassifier = ''
     archiveBaseName.set("${rootProject.archives_name}-Fabric-${rootProject.minecraft_version}")
     destinationDirectory.set(rootProject.file("builds/fabric"))
 }
 
-apply from: rootProject.file('gradle/client-runs.gradle')
+assemble.dependsOn shadowJar

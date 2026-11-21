@@ -1,34 +1,32 @@
 package com.lunazstudios.cobblefurnies.entity;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import com.lunazstudios.cobblefurnies.block.SeatBlock;
 import com.lunazstudios.cobblefurnies.registry.CFEntityTypes;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.animal.Parrot;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.feline.Cat;
+import net.minecraft.world.entity.animal.parrot.Parrot;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Skeleton;
-import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.monster.cubemob.Slime;
+import net.minecraft.world.entity.monster.skeleton.Skeleton;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
-
 public class SeatEntity extends Entity {
-    private static final ResourceLocation POKEMON = ResourceLocation.fromNamespaceAndPath("cobblemon", "pokemon");
 
     public SeatEntity(Level level) {
         super(CFEntityTypes.SEAT.get(), level);
@@ -40,8 +38,13 @@ public class SeatEntity extends Entity {
         this.setPos(pos.getX() + 0.5, pos.getY() + 0.001, pos.getZ() + 0.5);
     }
     @Override
+    public boolean hurtServer(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
+        return false;
+    }
+
+    @Override
     public void tick() {
-        if (this.level().isClientSide) return;
+        if (this.level().isClientSide()) return;
 
         BlockState state = this.level().getBlockState(this.blockPosition());
         boolean canSit;
@@ -57,10 +60,10 @@ public class SeatEntity extends Entity {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {}
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag compound) {}
+    protected void readAdditionalSaveData(ValueInput compound) {}
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compound) {}
+    protected void addAdditionalSaveData(ValueOutput compound) {}
 
     @Override
     public Vec3 getPassengerRidingPosition(Entity entity) {
@@ -84,7 +87,6 @@ public class SeatEntity extends Entity {
         if (entity instanceof Creeper) return 1 / 4f;
         if (entity instanceof Cat) return 1 / 8f;
         if (entity instanceof Wolf) return 1 / 16f;
-        if (POKEMON.equals(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()))) return 1 / 16f;
         return 0;
     }
 

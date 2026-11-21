@@ -9,11 +9,9 @@
                     "name": "cobblefurnies:black_sofa"
                 }
             ],
-            "conditions": [
-                {
-                    "condition": "minecraft:survives_explosion"
-                }
-            ]
+            "condition": {
+                "type": "minecraft:survives_explosion"
+            }
         }
     ]
 }

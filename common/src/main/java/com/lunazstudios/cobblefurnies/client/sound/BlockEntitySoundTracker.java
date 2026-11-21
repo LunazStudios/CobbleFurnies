@@ -2,7 +2,7 @@ package com.lunazstudios.cobblefurnies.client.sound;
 
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public final class BlockEntitySoundTracker {
@@ -12,7 +12,7 @@ public final class BlockEntitySoundTracker {
     private BlockEntitySoundTracker() {
     }
 
-    public static boolean isActive(BlockPos pos, ResourceLocation location) {
+    public static boolean isActive(BlockPos pos, Identifier location) {
         return INSTANCE.isActive(pos, location);
     }
 
@@ -24,7 +24,7 @@ public final class BlockEntitySoundTracker {
         INSTANCE.stop(pos, sound);
     }
 
-    public static void stop(BlockPos pos, ResourceLocation location) {
+    public static void stop(BlockPos pos, Identifier location) {
         INSTANCE.stop(pos, location);
     }
 
@@ -44,7 +44,7 @@ public final class BlockEntitySoundTracker {
         INSTANCE.clear(pos);
     }
 
-    public static @Nullable SoundInstance get(BlockPos pos, ResourceLocation location) {
+    public static @Nullable SoundInstance get(BlockPos pos, Identifier location) {
         return INSTANCE.get(pos, location);
     }
 }

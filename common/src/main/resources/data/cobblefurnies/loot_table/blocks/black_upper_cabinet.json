@@ -9,11 +9,9 @@
                     "name": "cobblefurnies:black_upper_cabinet"
                 }
             ],
-            "conditions": [
-                {
-                    "condition": "minecraft:survives_explosion"
-                }
-            ]
+            "condition": {
+                "type": "minecraft:survives_explosion"
+            }
         }
     ]
 }

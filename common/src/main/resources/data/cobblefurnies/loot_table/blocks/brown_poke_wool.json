@@ -9,11 +9,9 @@
                     "name": "cobblefurnies:brown_poke_wool"
                 }
             ],
-            "conditions": [
-                {
-                    "condition": "minecraft:survives_explosion"
-                }
-            ]
+            "condition": {
+                "type": "minecraft:survives_explosion"
+            }
         }
     ]
 }

@@ -2,25 +2,26 @@ package com.lunazstudios.cobblefurnies.block;
 
 import com.lunazstudios.cobblefurnies.block.entity.DecorativeStoveBlockEntity;
 import com.lunazstudios.cobblefurnies.block.properties.CFBlockStateProperties;
-import com.lunazstudios.cobblefurnies.compat.CobblemonCompat;
 import com.lunazstudios.cobblefurnies.registry.CFBlockEntityTypes;
 import com.lunazstudios.cobblefurnies.registry.CFBlockTags;
 import com.lunazstudios.cobblefurnies.util.block.ConnectedCounterShapes;
 import com.lunazstudios.cobblefurnies.util.item.PotColor;
-import com.mojang.serialization.MapCodec;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -30,14 +31,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 public class StoveBlock extends BaseEntityBlock {
-    public static final MapCodec<StoveBlock> CODEC = simpleCodec(StoveBlock::create);
-    public MapCodec<StoveBlock> codec() {
-        return CODEC;
-    }
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty CONNECTED_LEFT = CFBlockStateProperties.CONNECTED_LEFT;
     public static final BooleanProperty CONNECTED_RIGHT = CFBlockStateProperties.CONNECTED_RIGHT;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -63,10 +58,6 @@ public class StoveBlock extends BaseEntityBlock {
                 .setValue(COOKING, false)
                 .setValue(CFBlockStateProperties.HAS_POT, false)
                 .setValue(CFBlockStateProperties.POT_COLOR, PotColor.RED));
-    }
-
-    public static StoveBlock create(Properties properties) {
-        return CobblemonCompat.LOADED ? new CookingStoveBlock(properties) : new StoveBlock(properties);
     }
 
     @Override
@@ -107,9 +98,10 @@ public class StoveBlock extends BaseEntityBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos currentPos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos currentPos,
+                                  Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         if (state.getValue(WATERLOGGED)) {
-            level.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+            ticks.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         return getConnections(state, level, currentPos);
     }
@@ -120,7 +112,7 @@ public class StoveBlock extends BaseEntityBlock {
                 CFBlockStateProperties.HAS_POT, CFBlockStateProperties.POT_COLOR);
     }
 
-    private BlockState getConnections(BlockState state, @Nullable LevelAccessor level, @Nullable BlockPos pos) {
+    private BlockState getConnections(BlockState state, @Nullable LevelReader level, @Nullable BlockPos pos) {
         if (level == null || pos == null) {
             return state.setValue(CONNECTED_LEFT, false).setValue(CONNECTED_RIGHT, false);
         }

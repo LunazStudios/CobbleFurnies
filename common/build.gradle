@@ -1,16 +1,11 @@
-apply plugin: 'org.jetbrains.kotlin.jvm'
-
 architectury {
     common rootProject.enabled_platforms.split(',')
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.kotlin_runtime_version"
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    implementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
-    modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
+    implementation "dev.architectury:architectury:$rootProject.architectury_api_version"
 
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-
-    modImplementation "com.cobblemon:mod:${project.cobblemon_version}"
 }

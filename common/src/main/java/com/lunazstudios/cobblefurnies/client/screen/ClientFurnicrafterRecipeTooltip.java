@@ -1,19 +1,16 @@
 package com.lunazstudios.cobblefurnies.client.screen;
 
-import com.lunazstudios.cobblefurnies.recipe.CountedIngredient;
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import com.lunazstudios.cobblefurnies.recipe.FurniCraftingRecipe;
 import com.lunazstudios.cobblefurnies.menu.FurniCrafterMenu;
-import net.minecraft.Util;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.world.item.ItemStack;
-
+import com.lunazstudios.cobblefurnies.recipe.CountedIngredient;
+import com.lunazstudios.cobblefurnies.recipe.FurniCraftingRecipe;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStack;
 
 public class ClientFurnicrafterRecipeTooltip implements ClientTooltipComponent {
     private final FurniCrafterMenu menu;
@@ -25,7 +22,7 @@ public class ClientFurnicrafterRecipeTooltip implements ClientTooltipComponent {
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(Font font) {
         return 20;
     }
 
@@ -36,7 +33,7 @@ public class ClientFurnicrafterRecipeTooltip implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderImage(Font font, int start, int top, GuiGraphics graphics) {
+    public void extractImage(Font font, int start, int top, int width, int height, GuiGraphicsExtractor graphics) {
         Map<Integer, Integer> counted = new HashMap<>();
         List<CountedIngredient> materials = this.recipe.getMaterials();
         for (int i = 0; i < materials.size(); i++) {
@@ -44,22 +41,18 @@ public class ClientFurnicrafterRecipeTooltip implements ClientTooltipComponent {
             ItemStack copy = getStack(material).copy();
             copy.setCount(material.count());
             
-            graphics.renderFakeItem(copy, start + i * 18, top);
-            graphics.renderItemDecorations(font, copy, start + i * 18, top);
+            graphics.fakeItem(copy, start + i * 18, top);
+            graphics.itemDecorations(font, copy, start + i * 18, top);
 
             
-            PoseStack pose = graphics.pose();
-            pose.pushPose();
             
-            pose.translate(0, 0, 200);
             boolean hasEnough = this.menu.hasMaterials(material, counted);
-            graphics.blit(FurniCrafterScreen.TEXTURE, start + i * 18, top, hasEnough ? 246 : 240, 40, 6, 5, 256, 256);
-            pose.popPose();
+            graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, FurniCrafterScreen.TEXTURE, start + i * 18, top, hasEnough ? 246 : 240, 40, 6, 5, 256, 256);
         }
     }
 
     private ItemStack getStack(CountedIngredient material) {
-        ItemStack[] items = material.ingredient().getItems();
+        ItemStack[] items = material.alternatives();
         if (items.length == 0) {
             System.out.println("Empty ingredient stack for recipe");
             return ItemStack.EMPTY;

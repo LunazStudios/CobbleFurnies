@@ -3,20 +3,21 @@ package com.lunazstudios.cobblefurnies.block.entity;
 import com.lunazstudios.cobblefurnies.block.StoveBlock;
 import com.lunazstudios.cobblefurnies.block.properties.CFBlockStateProperties;
 import com.lunazstudios.cobblefurnies.registry.CFBlockEntityTypes;
+import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.BlockItem;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-
-import java.util.List;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public final class DecorativeStoveBlockEntity extends BlockEntity {
-    private static final List<String> BLOCK_ENTITY_METADATA = List.of("id", "x", "y", "z", "components", "keepPacked");
+    private static final List<String> COOKING_DATA = List.of("Items", "CookingProgress", "PotComponent");
 
     private CompoundTag storedData = new CompoundTag();
 
@@ -25,16 +26,20 @@ public final class DecorativeStoveBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        storedData = tag.copy();
-        BLOCK_ENTITY_METADATA.forEach(storedData::remove);
+    protected void loadAdditional(ValueInput tag) {
+        super.loadAdditional(tag);
+        storedData = new CompoundTag();
+        for (String key : COOKING_DATA) {
+            tag.read(key, ExtraCodecs.NBT).ifPresent(value -> storedData.put(key, value));
+        }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.merge(storedData);
+    protected void saveAdditional(ValueOutput tag) {
+        super.saveAdditional(tag);
+        for (String key : storedData.keySet()) {
+            tag.store(key, ExtraCodecs.NBT, storedData.get(key));
+        }
     }
 
     public void preserveContents(ItemStack stack) {
@@ -48,7 +53,7 @@ public final class DecorativeStoveBlockEntity extends BlockEntity {
                     .with(StoveBlock.COOKING, state));
         }
         if (!storedData.isEmpty()) {
-            BlockItem.setBlockEntityData(stack, getType(), storedData.copy());
+            stack.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(getType(), storedData.copy()));
         }
     }
 }

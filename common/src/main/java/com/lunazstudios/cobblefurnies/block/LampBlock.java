@@ -81,7 +81,7 @@ public class LampBlock extends FurnitureHorizontalBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             boolean powered = blockState.getValue(POWERED);
             level.setBlock(blockPos, blockState.setValue(LIT, !blockState.getValue(LIT) && !powered), 3);
             level.playSound(null, blockPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 1.0f, 1.0f);
@@ -91,8 +91,8 @@ public class LampBlock extends FurnitureHorizontalBlock {
 
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos,
-                                Block block, BlockPos fromPos, boolean isMoving) {
-        if (!level.isClientSide) {
+                                Block block, net.minecraft.world.level.redstone.Orientation orientation, boolean isMoving) {
+        if (!level.isClientSide()) {
             boolean isPowered = level.hasNeighborSignal(pos);
             level.setBlock(pos, state.setValue(POWERED, isPowered).setValue(LIT, isPowered), 2);
         }

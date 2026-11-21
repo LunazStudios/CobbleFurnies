@@ -3,7 +3,7 @@
   "id": "cobblefurnies",
   "version": "${version}",
   "name": "CobbleFurnies",
-  "description": "Whether you're building a professor's lab, a bustling Pokécenter, or just a cozy cabin in the woods, CobbleFurnies is here to make your world feel more alive!",
+  "description": "Whether you're building a professor's lab, a bustling PokÃƒÂ©center, or just a cozy cabin in the woods, CobbleFurnies is here to make your world feel more alive!",
   "authors": [
     "LunazStudios"
   ],
@@ -28,22 +28,12 @@
       "com.lunazstudios.cobblefurnies.compat.JEICobbleFurniesPlugin"
     ]
   },
-  "mixins": [
-    "cobblefurnies.mixins.json"
-  ],
   "depends": {
     "fabricloader": ">=0.20.1",
-    "minecraft": "1.21.1",
-    "java": ">=21",
-    "athena": ">=4.0.6",
-    "architectury": ">=13.0.11",
-    "fabric-api": ">=0.116.18+1.21.1",
-    "fabric-language-kotlin": ">=1.13.12+kotlin.2.4.0"
-  },
-  "suggests": {
-    "cobblemon": ">=1.8.4 <1.9"
-  },
-  "breaks": {
-    "cobblemon": ["<1.8.4", ">=1.9"]
+    "minecraft": "26.3",
+    "java": ">=25",
+    "athena": ">=4.7.4",
+    "architectury": ">=22.0.6",
+    "fabric-api": ">=0.166.2"
   }
 }

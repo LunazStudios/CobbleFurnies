@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
 }
 
 architectury {
@@ -37,13 +37,6 @@ repositories {
         content { includeGroup("earth.terrarium.athena") }
     }
     maven {
-        name = 'GeckoLib'
-        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-        content {
-            includeGroup("software.bernie.geckolib")
-        }
-    }
-    maven {
         name = "Jared's maven"
         url = "https://maven.blamejared.com/"
         content {
@@ -64,23 +57,15 @@ repositories {
 dependencies {
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
 
-    modImplementation "earth.terrarium.athena:athena-neoforge-1.21.1:${athena_version}"
-    modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
-    if (!providers.gradleProperty("withoutCobblemon").isPresent()) {
-        modImplementation "com.cobblemon:neoforge:${project.cobblemon_version}"
-    }
+    implementation "earth.terrarium.athena:athena-neoforge-${minecraft_version}:${athena_version}"
+    implementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
 
-    modImplementation "thedarkcolour:kotlinforforge-neoforge:${project.kotlin_for_forge_version}"
-    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.kotlin_runtime_version"
-    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$rootProject.kotlin_runtime_version"
-    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$rootProject.kotlin_runtime_version"
-    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-reflect:$rootProject.kotlin_runtime_version"
-
-    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
+    common(project(path: ':common')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}") { transitive false }
+    runtimeOnly("net.mezzdev.config:mezz_config-${minecraft_version}-neoforge:${mezz_config_version}") { transitive false }
 }
 
 processResources {
@@ -93,13 +78,12 @@ processResources {
 
 shadowJar {
     configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
-}
-
-remapJar {
-    input.set shadowJar.archiveFile
+    dependsOn jar
+    mainSpec.sourcePaths.clear()
+    from(zipTree(jar.archiveFile))
+    archiveClassifier = ''
     archiveBaseName.set("${rootProject.archives_name}-NeoForge-${rootProject.minecraft_version}")
     destinationDirectory.set(rootProject.file("builds/neoforge"))
 }
 
-apply from: rootProject.file('gradle/client-runs.gradle')
+assemble.dependsOn shadowJar

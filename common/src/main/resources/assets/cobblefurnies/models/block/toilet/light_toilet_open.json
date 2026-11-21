@@ -1,6 +1,9 @@
 {
     "parent": "cobblefurnies:block/template/toilet_open",
     "textures": {
-        "2": "cobblefurnies:block/toilet/light_toilet"
+        "2": {
+            "sprite": "cobblefurnies:block/toilet/light_toilet",
+            "force_translucent": true
+        }
     }
 }

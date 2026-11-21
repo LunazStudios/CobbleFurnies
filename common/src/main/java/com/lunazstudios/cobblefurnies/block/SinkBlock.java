@@ -8,16 +8,17 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -26,7 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
@@ -36,7 +37,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class SinkBlock extends Block implements SimpleWaterloggedBlock {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty CONNECTED_LEFT = CFBlockStateProperties.CONNECTED_LEFT;
     public static final BooleanProperty CONNECTED_RIGHT = CFBlockStateProperties.CONNECTED_RIGHT;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -72,19 +73,19 @@ public class SinkBlock extends Block implements SimpleWaterloggedBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
         spawnWaterParticles(level, blockPos);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    protected InteractionResult useItemOn(ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (itemStack.is(Items.BUCKET)) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 ItemStack waterBucket = new ItemStack(Items.WATER_BUCKET);
 
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                     if (!player.getInventory().add(waterBucket)) {
-                        player.drop(waterBucket, false);
+                        player.drop(waterBucket, false, net.minecraft.util.Prediction.SERVER_ONLY);
                     }
                 }
 
@@ -92,20 +93,20 @@ public class SinkBlock extends Block implements SimpleWaterloggedBlock {
             }
 
             spawnWaterParticles(level, blockPos);
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
         }
 
         spawnWaterParticles(level, blockPos);
-        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
     private void spawnWaterParticles(Level level, BlockPos pos) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             for (int i = 0; i < 5; i++) {
                 level.addParticle(ParticleTypes.SPLASH,
-                        pos.getX() + 0.5 + (level.random.nextDouble() - 0.5) * 0.3,
+                        pos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 0.3,
                         pos.getY() + 1.1,
-                        pos.getZ() + 0.5 + (level.random.nextDouble() - 0.5) * 0.3,
+                        pos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 0.3,
                         0, 0.05, 0);
             }
         }
@@ -125,9 +126,10 @@ public class SinkBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos currentPos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos currentPos,
+                                  Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         if (state.getValue(WATERLOGGED)) {
-            level.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+            ticks.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         return getConnections(state, level, currentPos);
     }
@@ -137,7 +139,7 @@ public class SinkBlock extends Block implements SimpleWaterloggedBlock {
         builder.add(FACING, CONNECTED_LEFT, CONNECTED_RIGHT, WATERLOGGED);
     }
 
-    private BlockState getConnections(BlockState state, @Nullable LevelAccessor level, @Nullable BlockPos pos) {
+    private BlockState getConnections(BlockState state, @Nullable LevelReader level, @Nullable BlockPos pos) {
         if (level == null || pos == null) {
             return state.setValue(CONNECTED_LEFT, false).setValue(CONNECTED_RIGHT, false);
         }

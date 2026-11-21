@@ -9,11 +9,9 @@
                     "name": "cobblefurnies:yellow_armchair"
                 }
             ],
-            "conditions": [
-                {
-                    "condition": "minecraft:survives_explosion"
-                }
-            ]
+            "condition": {
+                "type": "minecraft:survives_explosion"
+            }
         }
     ]
 }

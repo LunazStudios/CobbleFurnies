@@ -9,11 +9,9 @@
                     "name": "cobblefurnies:dark_oak_wall_support"
                 }
             ],
-            "conditions": [
-                {
-                    "condition": "minecraft:survives_explosion"
-                }
-            ]
+            "condition": {
+                "type": "minecraft:survives_explosion"
+            }
         }
     ]
 }

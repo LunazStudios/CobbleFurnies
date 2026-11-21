@@ -11,8 +11,6 @@
 		{"id": "cobblefurnies:mangrove_nightstand", "required": false},
 		{"id": "cobblefurnies:oak_nightstand", "required": false},
 		{"id": "cobblefurnies:spruce_nightstand", "required": false},
-		{"id": "cobblefurnies:warped_nightstand", "required": false},
-		{"id": "cobblefurnies:apricorn_nightstand", "required": false},
-		{"id": "cobblefurnies:saccharine_nightstand", "required": false}
+		{"id": "cobblefurnies:warped_nightstand", "required": false}
 	]
 }

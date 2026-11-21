@@ -9,11 +9,9 @@
                     "name": "cobblefurnies:light_blue_poke_wool_carpet"
                 }
             ],
-            "conditions": [
-                {
-                    "condition": "minecraft:survives_explosion"
-                }
-            ]
+            "condition": {
+                "type": "minecraft:survives_explosion"
+            }
         }
     ]
 }

@@ -2,13 +2,10 @@ package com.lunazstudios.cobblefurnies.block;
 
 import com.lunazstudios.cobblefurnies.block.entity.FridgeBlockEntity;
 import com.lunazstudios.cobblefurnies.util.block.ShapeUtil;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Container;
-import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
@@ -21,8 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -30,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class FridgeBlock extends BaseEntityBlock {
 
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 
     private final Block freezerBlock;
@@ -72,7 +68,7 @@ public class FridgeBlock extends BaseEntityBlock {
     @Override
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
         super.onPlace(state, level, pos, oldState, isMoving);
-        if (!level.isClientSide && freezerBlock != null) {
+        if (!level.isClientSide() && freezerBlock != null) {
             BlockPos abovePos = pos.above();
             if (level.getBlockState(abovePos).isAir()) {
                 BlockState freezerState = freezerBlock.defaultBlockState();
@@ -85,29 +81,22 @@ public class FridgeBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (!state.is(newState.getBlock())) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof Container container) {
-                Containers.dropContents(level, pos, container);
-                level.updateNeighbourForOutputSignal(pos, this);
-            }
-            BlockPos freezerPos = pos.above();
-            if (level.getBlockState(freezerPos).getBlock() instanceof FreezerBlock) {
-                level.removeBlock(freezerPos, false);
-            }
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
+        BlockPos freezerPos = pos.above();
+        if (level.getBlockState(freezerPos).getBlock() instanceof FreezerBlock) {
+            level.removeBlock(freezerPos, false);
         }
-        super.onRemove(state, level, pos, newState, isMoving);
+        level.updateNeighbourForOutputSignal(pos, this);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof FridgeBlockEntity BE) {
             player.openMenu(BE);
-            PiglinAi.angerNearbyPiglins(player, true);
+            if (level instanceof ServerLevel server) PiglinAi.angerNearbyPiglins(server, player, true);
         }
         return InteractionResult.CONSUME;
     }
@@ -157,7 +146,7 @@ public class FridgeBlock extends BaseEntityBlock {
         BlockPos pos = context.getClickedPos();
         BlockPos abovePos = pos.above();
         BlockState aboveState = world.getBlockState(abovePos);
-        if (pos.getY() < world.getMaxBuildHeight() - 1 && aboveState.canBeReplaced(context)) {
+        if (pos.getY() < world.getMaxY() && aboveState.canBeReplaced(context)) {
             return this.defaultBlockState()
                     .setValue(FACING, context.getHorizontalDirection().getOpposite())
                     .setValue(OPEN, false);
@@ -165,10 +154,6 @@ public class FridgeBlock extends BaseEntityBlock {
         return null;
     }
 
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return null;
-    }
 
     @Override
     public RenderShape getRenderShape(BlockState state) {

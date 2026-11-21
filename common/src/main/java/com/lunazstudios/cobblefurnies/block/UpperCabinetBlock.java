@@ -3,15 +3,12 @@ package com.lunazstudios.cobblefurnies.block;
 import com.lunazstudios.cobblefurnies.block.entity.UpperCabinetBlockEntity;
 import com.lunazstudios.cobblefurnies.block.properties.CFBlockStateProperties;
 import com.lunazstudios.cobblefurnies.util.block.ShapeUtil;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Container;
-import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
@@ -22,7 +19,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,11 +35,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class UpperCabinetBlock extends BaseEntityBlock {
-    public static final MapCodec<UpperCabinetBlock> CODEC = simpleCodec(UpperCabinetBlock::new);
-    public MapCodec<UpperCabinetBlock> codec() {
-        return CODEC;
-    }
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty HAS_GLASS = CFBlockStateProperties.HAS_GLASS;
@@ -63,7 +57,7 @@ public class UpperCabinetBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (!(blockEntity instanceof UpperCabinetBlockEntity cabinetBE)) return InteractionResult.PASS;
@@ -74,7 +68,7 @@ public class UpperCabinetBlock extends BaseEntityBlock {
             if (state.getValue(HAS_GLASS)) {
                 ItemStack glassPane = new ItemStack(Items.GLASS_PANE);
                 if (!player.getInventory().add(glassPane)) {
-                    player.drop(glassPane, false);
+                    player.drop(glassPane, false, net.minecraft.util.Prediction.SERVER_ONLY);
                 }
 
                 level.setBlock(pos, state.setValue(HAS_GLASS, false), 3);
@@ -97,19 +91,14 @@ public class UpperCabinetBlock extends BaseEntityBlock {
         }
 
         player.openMenu(cabinetBE);
-        PiglinAi.angerNearbyPiglins(player, true);
+        if (level instanceof ServerLevel server) PiglinAi.angerNearbyPiglins(server, player, true);
         return InteractionResult.CONSUME;
     }
 
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (state.is(newState.getBlock())) return;
+    @Override
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
 
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof Container) {
-            Containers.dropContents(level, pos, (Container)blockEntity);
-            level.updateNeighbourForOutputSignal(pos, this);
-        }
-        super.onRemove(state, level, pos, newState, isMoving);
+        level.updateNeighbourForOutputSignal(pos, this);
     }
 
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
@@ -155,11 +144,12 @@ public class UpperCabinetBlock extends BaseEntityBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos currentPos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos currentPos,
+                                  Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         if (state.getValue(WATERLOGGED)) {
-            level.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+            ticks.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
-        return super.updateShape(state, direction, neighborState, level, currentPos, neighborPos);
+        return super.updateShape(state, level, ticks, currentPos, direction, neighborPos, neighborState, random);
     }
 
     @Override

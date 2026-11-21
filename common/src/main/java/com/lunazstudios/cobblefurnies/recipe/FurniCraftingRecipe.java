@@ -2,24 +2,24 @@ package com.lunazstudios.cobblefurnies.recipe;
 
 import com.lunazstudios.cobblefurnies.registry.CFRecipes;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class FurniCraftingRecipe implements Recipe<SingleRecipeInput> {
-    private final NonNullList<CountedIngredient> materials;
-    private final ItemStack result;
+    private final List<CountedIngredient> materials;
+    private final ItemStackTemplate result;
     private final boolean notification;
 
-    public FurniCraftingRecipe(NonNullList<CountedIngredient> materials, ItemStack result, boolean notification) {
+    public FurniCraftingRecipe(List<CountedIngredient> materials, ItemStackTemplate result, boolean notification) {
         this.materials = materials;
         this.result = result;
         this.notification = notification;
@@ -39,31 +39,36 @@ public class FurniCraftingRecipe implements Recipe<SingleRecipeInput> {
     }
 
     @Override
-    public @NotNull ItemStack assemble(SingleRecipeInput input, HolderLookup.Provider provider) {
-        return this.result.copy();
+    public @NotNull ItemStack assemble(SingleRecipeInput input) {
+        return this.result.create();
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return true;
-    }
+    public boolean showNotification() { return notification; }
 
     @Override
-    public @NotNull ItemStack getResultItem(HolderLookup.Provider provider) {
-        return this.result.copy();
-    }
+    public String group() { return ""; }
 
     @Override
-    public @NotNull RecipeSerializer<?> getSerializer() {
+    public boolean isSpecial() { return true; }
+
+    @Override
+    public PlacementInfo placementInfo() { return PlacementInfo.NOT_PLACEABLE; }
+
+    @Override
+    public RecipeBookCategory recipeBookCategory() { return RecipeBookCategories.CRAFTING_MISC; }
+
+    @Override
+    public @NotNull RecipeSerializer<FurniCraftingRecipe> getSerializer() {
         return CFRecipes.FURNI_CRAFTING_SERIALIZER;
     }
 
     @Override
-    public @NotNull RecipeType<?> getType() {
+    public @NotNull RecipeType<FurniCraftingRecipe> getType() {
         return CFRecipes.FURNI_CRAFTING_RECIPE_TYPE;
     }
 
-    public NonNullList<CountedIngredient> getMaterials() {
+    public List<CountedIngredient> getMaterials() {
         return this.materials;
     }
 
@@ -71,7 +76,7 @@ public class FurniCraftingRecipe implements Recipe<SingleRecipeInput> {
     public ItemStack[] getMaterialStacks() {
         return this.materials.stream()
                 .map(ci -> {
-                    ItemStack[] stacks = ci.ingredient().getItems();
+                    ItemStack[] stacks = ci.alternatives();
                     if (stacks.length > 0) {
                         ItemStack stack = stacks[0].copy();
                         stack.setCount(ci.count());
@@ -83,21 +88,16 @@ public class FurniCraftingRecipe implements Recipe<SingleRecipeInput> {
     }
 
     public ItemStack getResult() {
-        return this.result;
+        return this.result.create();
     }
 
     
-    public static class Serializer implements RecipeSerializer<FurniCraftingRecipe> {
-        public static final Serializer INSTANCE = new Serializer();
+    public static class Serializer {
 
         public static final MapCodec<FurniCraftingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
                 instance.group(
-                        CountedIngredient.CODEC.listOf().fieldOf("materials")
-                                .flatXmap(
-                                        list -> DataResult.success(NonNullList.of(CountedIngredient.EMPTY, list.toArray(new CountedIngredient[0]))),
-                                        nonNullList -> DataResult.success(nonNullList.stream().toList())
-                                ).forGetter(recipe -> recipe.materials),
-                        ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
+                        CountedIngredient.CODEC.listOf().fieldOf("materials").forGetter(recipe -> recipe.materials),
+                        ItemStackTemplate.CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
                         Codec.BOOL.optionalFieldOf("show_notification", false).forGetter(recipe -> recipe.notification)
                 ).apply(instance, FurniCraftingRecipe::new)
         );
@@ -110,36 +110,22 @@ public class FurniCraftingRecipe implements Recipe<SingleRecipeInput> {
                         
                         Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ci.ingredient());
                     }
-                    ItemStack.STREAM_CODEC.encode(buf, recipe.result);
+                    ItemStackTemplate.STREAM_CODEC.encode(buf, recipe.result);
                     buf.writeBoolean(recipe.notification);
                 },
                 buf -> {
                     int size = buf.readVarInt();
-                    NonNullList<CountedIngredient> materials = NonNullList.create();
+                    List<CountedIngredient> materials = new ArrayList<>();
                     for (int i = 0; i < size; i++) {
                         int count = buf.readVarInt();
                         Ingredient ingredient = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
                         materials.add(new CountedIngredient(ingredient, count));
                     }
-                    ItemStack result = ItemStack.STREAM_CODEC.decode(buf);
+                    ItemStackTemplate result = ItemStackTemplate.STREAM_CODEC.decode(buf);
                     boolean notification = buf.readBoolean();
                     return new FurniCraftingRecipe(materials, result, notification);
                 }
         );
 
-        @Override
-        public MapCodec<FurniCraftingRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, FurniCraftingRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
-    }
-
-    
-    public static class Type implements RecipeType<FurniCraftingRecipe> {
-        public static final Type INSTANCE = new Type();
     }
 }

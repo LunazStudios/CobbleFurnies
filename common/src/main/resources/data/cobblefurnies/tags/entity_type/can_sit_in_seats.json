@@ -19,7 +19,6 @@
     "minecraft:rabbit",
     "minecraft:sheep",
     "minecraft:trader_llama",
-    "minecraft:wolf",
-    {"id": "cobblemon:pokemon", "required": false}
+    "minecraft:wolf"
   ]
 }

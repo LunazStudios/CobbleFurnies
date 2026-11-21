@@ -1,11 +1,9 @@
 package com.lunazstudios.cobblefurnies.registry;
 
 import com.lunazstudios.cobblefurnies.block.entity.*;
-import com.lunazstudios.cobblefurnies.compat.CobblemonCompat;
+import java.util.function.Supplier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-
-import java.util.function.Supplier;
 
 public class CFBlockEntityTypes {
     /*
@@ -14,12 +12,7 @@ public class CFBlockEntityTypes {
                     CFBlocks.PORYGON_ARCADE.get(), CFBlocks.BULBASAUR_ARCADE.get()));
     */
 
-    public static final Supplier<? extends BlockEntityType<?>> STOVE = CobblemonCompat.LOADED
-            ? Cooking.STOVE : registerStove(DecorativeStoveBlockEntity::new);
-
-    public static final class Cooking {
-        public static final Supplier<BlockEntityType<StoveBlockEntity>> STOVE = registerStove(StoveBlockEntity::new);
-    }
+    public static final Supplier<BlockEntityType<DecorativeStoveBlockEntity>> STOVE = registerStove(DecorativeStoveBlockEntity::new);
 
     private static <T extends BlockEntity> Supplier<BlockEntityType<T>> registerStove(CFRegistry.BlockEntitySupplier<T> factory) {
         return CFRegistry.registerBlockEntityType("stove", () -> CFRegistry.createBlockEntityType(factory,
@@ -93,9 +86,7 @@ public class CFBlockEntityTypes {
                     CFBlocks.BAMBOO_NIGHTSTAND.get(),
                     CFBlocks.CHERRY_NIGHTSTAND.get(),
                     CFBlocks.WARPED_NIGHTSTAND.get(),
-                    CFBlocks.CRIMSON_NIGHTSTAND.get(),
-                    CFBlocks.APRICORN_NIGHTSTAND.get(),
-                    CFBlocks.SACCHARINE_NIGHTSTAND.get()
+                    CFBlocks.CRIMSON_NIGHTSTAND.get()
             ));
 
     public static final Supplier<BlockEntityType<CabinetBlockEntity>> CABINET = CFRegistry.registerBlockEntityType("cabinet",
@@ -110,18 +101,7 @@ public class CFBlockEntityTypes {
                     CFBlocks.BAMBOO_CABINET.get(),
                     CFBlocks.CHERRY_CABINET.get(),
                     CFBlocks.WARPED_CABINET.get(),
-                    CFBlocks.CRIMSON_CABINET.get(),
-                    CFBlocks.APRICORN_CABINET.get(),
-                    CFBlocks.SACCHARINE_CABINET.get()
-            ));
-
-    public static final Supplier<BlockEntityType<StatueBlockEntity>> STATUE = CFRegistry.registerBlockEntityType("statue",
-            () -> CFRegistry.createBlockEntityType(StatueBlockEntity::new,
-                    CFBlocks.STATUE_ANCIENT.get(),
-                    CFBlocks.STATUE_SQUIRTLE.get(),
-                    CFBlocks.STATUE_BULBASAUR.get(),
-                    CFBlocks.STATUE_CHARMANDER.get(),
-                    CFBlocks.STATUE_PIKACHU.get()
+                    CFBlocks.CRIMSON_CABINET.get()
             ));
 
     public static final Supplier<BlockEntityType<FridgeBlockEntity>> FRIDGE = CFRegistry.registerBlockEntityType("fridge",

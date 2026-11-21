@@ -1,17 +1,17 @@
 package com.lunazstudios.cobblefurnies.menu;
 
 import com.lunazstudios.cobblefurnies.block.entity.FurniCrafterBlockEntity;
-import com.lunazstudios.cobblefurnies.network.CFNetwork;
 import com.lunazstudios.cobblefurnies.network.message.SyncCraftableRecipesMessage;
 import com.lunazstudios.cobblefurnies.recipe.CountedIngredient;
 import com.lunazstudios.cobblefurnies.recipe.FurniCraftingRecipe;
+import com.lunazstudios.cobblefurnies.recipe.FurniRecipes;
 import com.lunazstudios.cobblefurnies.registry.CFMenus;
-import com.lunazstudios.cobblefurnies.registry.CFRecipes;
 import dev.architectury.networking.NetworkManager;
-import io.netty.buffer.Unpooled;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -22,11 +22,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class FurniCrafterMenu extends AbstractContainerMenu {
 
@@ -94,12 +89,8 @@ public class FurniCrafterMenu extends AbstractContainerMenu {
     }
 
     private void fetchAvailableRecipes() {
-        this.availableRecipes = level.getRecipeManager()
-                .getAllRecipesFor(CFRecipes.FURNI_CRAFTING_RECIPE_TYPE)
-                .stream()
-                .filter(holder -> holder.value().getResult().isItemEnabled(level.enabledFeatures()))
-                .sorted(Comparator.comparing(RecipeHolder::id))
-                .collect(Collectors.toList());
+        this.availableRecipes = level instanceof net.minecraft.server.level.ServerLevel server
+                ? FurniRecipes.onServer(server) : FurniRecipes.onClient();
     }
 
     public List<RecipeHolder<FurniCraftingRecipe>> getAvailableRecipes() {
@@ -110,7 +101,7 @@ public class FurniCrafterMenu extends AbstractContainerMenu {
         for (CountedIngredient ci : recipe.getMaterials()) {
             int requiredCount = ci.count();
             int totalCount = 0;
-            for (ItemStack stack : player.getInventory().items) {
+            for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
                 if (!stack.isEmpty() && ci.ingredient().test(stack)) {
                     totalCount += stack.getCount();
                 }
@@ -165,7 +156,7 @@ public class FurniCrafterMenu extends AbstractContainerMenu {
             return;
         }
 
-        ItemStack singleResult = recipe.getResultItem(null);
+        ItemStack singleResult = recipe.getResult();
         if (singleResult.isEmpty()) {
             return;
         }
@@ -233,7 +224,7 @@ public class FurniCrafterMenu extends AbstractContainerMenu {
 
     private int countMatchingInInventory(CountedIngredient ci) {
         int total = 0;
-        for (ItemStack stack : player.getInventory().items) {
+        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             if (!stack.isEmpty() && ci.ingredient().test(stack)) {
                 total += stack.getCount();
             }
@@ -245,8 +236,8 @@ public class FurniCrafterMenu extends AbstractContainerMenu {
         int requiredTotal = ci.count() * crafts;
         int remaining = requiredTotal;
 
-        for (int i = 0; i < player.getInventory().items.size(); i++) {
-            ItemStack stack = player.getInventory().items.get(i);
+        for (int i = 0; i < player.getInventory().getNonEquipmentItems().size(); i++) {
+            ItemStack stack = player.getInventory().getNonEquipmentItems().get(i);
             if (!stack.isEmpty() && ci.ingredient().test(stack)) {
                 int take = Math.min(stack.getCount(), remaining);
                 stack.shrink(take);
@@ -277,7 +268,7 @@ public class FurniCrafterMenu extends AbstractContainerMenu {
     public boolean hasMaterials(CountedIngredient material, Map<Integer, Integer> counted) {
         int required = material.count();
         
-        for (ItemStack stack : player.getInventory().items) {
+        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             if (!stack.isEmpty() && material.ingredient().test(stack)) {
                 
                 int key = stack.getItem().hashCode();

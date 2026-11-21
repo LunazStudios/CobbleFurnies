@@ -15,7 +15,7 @@ public class CFRecipes {
             };
 
     public static final RecipeSerializer<FurniCraftingRecipe> FURNI_CRAFTING_SERIALIZER =
-            new FurniCraftingRecipe.Serializer();
+            new RecipeSerializer<>(FurniCraftingRecipe.Serializer.CODEC, FurniCraftingRecipe.Serializer.STREAM_CODEC);
 
     public static void register() {
         CFRegistry.registerRecipeType("furni_crafting", () -> FURNI_CRAFTING_RECIPE_TYPE);

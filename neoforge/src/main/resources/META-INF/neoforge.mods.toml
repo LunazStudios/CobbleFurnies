@@ -9,51 +9,34 @@ version = "${version}"
 displayName = "CobbleFurnies"
 authors = "LunazStudios"
 description = '''
-Whether you're building a professor's lab, a bustling Pokécenter, or just a cozy cabin in the woods, CobbleFurnies is here to make your world feel more alive!
+Whether you're building a professor's lab, a bustling PokÃ©center, or just a cozy cabin in the woods, CobbleFurnies is here to make your world feel more alive!
 '''
-logoFile = "icon.png"
+iconFile = "icon.png"
 
 [[dependencies.cobblefurnies]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.1.265,21.2)"
+versionRange = "[26.3.0.64-beta,26.4)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cobblefurnies]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.1]"
-ordering = "NONE"
-side = "BOTH"
-
-[[dependencies.cobblefurnies]]
-modId = "cobblemon"
-type = "optional"
-versionRange = "[1.8.4,1.9)"
+versionRange = "[26.3]"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cobblefurnies]]
 modId = "architectury"
 type = "required"
-versionRange = "[13.0.11,14)"
+versionRange = "[22.0.6,23)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cobblefurnies]]
 modId = "athena"
 type = "required"
-versionRange = "[4.0.6,5)"
+versionRange = "[4.7.4,5)"
 ordering = "NONE"
 side = "BOTH"
-
-[[dependencies.cobblefurnies]]
-modId = "kotlinforforge"
-type = "required"
-versionRange = "[5.12.0,6)"
-ordering = "NONE"
-side = "BOTH"
-
-[[mixins]]
-config = "cobblefurnies.mixins.json"

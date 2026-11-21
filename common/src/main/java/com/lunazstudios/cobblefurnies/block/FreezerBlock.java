@@ -1,14 +1,12 @@
 package com.lunazstudios.cobblefurnies.block;
 
+import com.lunazstudios.cobblefurnies.block.FridgeBlock;
 import com.lunazstudios.cobblefurnies.block.entity.FreezerBlockEntity;
 import com.lunazstudios.cobblefurnies.util.block.ShapeUtil;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Container;
-import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
@@ -21,20 +19,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-import com.lunazstudios.cobblefurnies.block.FridgeBlock;
-
 public class FreezerBlock extends BaseEntityBlock {
-    public static final MapCodec<FreezerBlock> CODEC = simpleCodec(FreezerBlock::new);
-    public MapCodec<FreezerBlock> codec() {
-        return CODEC;
-    }
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 
     protected static final VoxelShape SHAPE_NORTH = Shapes.or(
@@ -72,30 +64,23 @@ public class FreezerBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof FreezerBlockEntity BE) {
             player.openMenu(BE);
-            PiglinAi.angerNearbyPiglins(player, true);
+            if (level instanceof ServerLevel server) PiglinAi.angerNearbyPiglins(server, player, true);
         }
         return InteractionResult.CONSUME;
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (!state.is(newState.getBlock())) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof Container container) {
-                Containers.dropContents(level, pos, container);
-                level.updateNeighbourForOutputSignal(pos, this);
-            }
-            BlockPos fridgePos = pos.below();
-            if (level.getBlockState(fridgePos).getBlock() instanceof FridgeBlock) {
-                level.removeBlock(fridgePos, false);
-            }
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
+        BlockPos fridgePos = pos.below();
+        if (level.getBlockState(fridgePos).getBlock() instanceof FridgeBlock) {
+            level.removeBlock(fridgePos, false);
         }
-        super.onRemove(state, level, pos, newState, isMoving);
+        level.updateNeighbourForOutputSignal(pos, this);
     }
 
     @Override

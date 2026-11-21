@@ -3,16 +3,14 @@ package com.lunazstudios.cobblefurnies.block;
 import com.lunazstudios.cobblefurnies.block.entity.NightStandBlockEntity;
 import com.lunazstudios.cobblefurnies.block.properties.CFBlockStateProperties;
 import com.lunazstudios.cobblefurnies.util.block.ShapeUtil;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,14 +21,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -41,11 +39,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class NightStandBlock extends BaseEntityBlock {
-    public static final MapCodec<NightStandBlock> CODEC = simpleCodec(NightStandBlock::new);
-    public MapCodec<NightStandBlock> codec() {
-        return CODEC;
-    }
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty HAS_CONCRETE = CFBlockStateProperties.HAS_CONCRETE;
@@ -74,7 +68,7 @@ public class NightStandBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (!(blockEntity instanceof NightStandBlockEntity nightStandBE)) return InteractionResult.PASS;
@@ -84,12 +78,12 @@ public class NightStandBlock extends BaseEntityBlock {
         if (player.isShiftKeyDown() && itemStack.isEmpty()) {
             if (state.getValue(CFBlockStateProperties.HAS_CONCRETE)) {
                 DyeColor currentColor = state.getValue(CFBlockStateProperties.CONCRETE_COLOR);
-                ResourceLocation concreteId = ResourceLocation.withDefaultNamespace(currentColor.getName() + "_concrete");
-                Block concreteBlock = BuiltInRegistries.BLOCK.get(concreteId);
+                Identifier concreteId = Identifier.withDefaultNamespace(currentColor.getName() + "_concrete");
+                Block concreteBlock = BuiltInRegistries.BLOCK.getValue(concreteId);
                 ItemStack concreteStack = new ItemStack(concreteBlock.asItem());
 
                 if (!player.getInventory().add(concreteStack)) {
-                    player.drop(concreteStack, false);
+                    player.drop(concreteStack, false, net.minecraft.util.Prediction.SERVER_ONLY);
                 }
 
                 level.setBlock(pos,
@@ -125,7 +119,7 @@ public class NightStandBlock extends BaseEntityBlock {
 
         if (blockEntity instanceof NightStandBlockEntity nighstandBE) {
             player.openMenu(nighstandBE);
-            PiglinAi.angerNearbyPiglins(player, true);
+            if (level instanceof ServerLevel server) PiglinAi.angerNearbyPiglins(server, player, true);
         }
         return InteractionResult.CONSUME;
     }
@@ -133,8 +127,8 @@ public class NightStandBlock extends BaseEntityBlock {
     @Nullable
     private DyeColor getConcreteColor(Block block) {
         for (DyeColor color : DyeColor.values()) {
-            ResourceLocation id = ResourceLocation.withDefaultNamespace(color.getName() + "_concrete");
-            Block expected = BuiltInRegistries.BLOCK.get(id);
+            Identifier id = Identifier.withDefaultNamespace(color.getName() + "_concrete");
+            Block expected = BuiltInRegistries.BLOCK.getValue(id);
             if (block == expected) {
                 return color;
             }
@@ -142,23 +136,16 @@ public class NightStandBlock extends BaseEntityBlock {
         return null;
     }
 
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (state.is(newState.getBlock())) return;
-
+    @Override
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
         if (state.getValue(HAS_CONCRETE)) {
             DyeColor color = state.getValue(CONCRETE_COLOR);
-            ResourceLocation concreteId = ResourceLocation.withDefaultNamespace(color.getName() + "_concrete");
-            Block concreteBlock = BuiltInRegistries.BLOCK.get(concreteId);
+            Identifier concreteId = Identifier.withDefaultNamespace(color.getName() + "_concrete");
+            Block concreteBlock = BuiltInRegistries.BLOCK.getValue(concreteId);
             ItemStack concreteStack = new ItemStack(concreteBlock.asItem());
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), concreteStack);
         }
-
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof Container) {
-            Containers.dropContents(level, pos, (Container)blockEntity);
-            level.updateNeighbourForOutputSignal(pos, this);
-        }
-        super.onRemove(state, level, pos, newState, isMoving);
+        level.updateNeighbourForOutputSignal(pos, this);
     }
 
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
@@ -202,9 +189,10 @@ public class NightStandBlock extends BaseEntityBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos currentPos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos currentPos,
+                                  Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         if (state.getValue(WATERLOGGED)) {
-            level.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+            ticks.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         return state;
     }

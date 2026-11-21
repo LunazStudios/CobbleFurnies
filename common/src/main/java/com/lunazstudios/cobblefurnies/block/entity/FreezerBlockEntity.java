@@ -4,15 +4,13 @@ import com.lunazstudios.cobblefurnies.block.FreezerBlock;
 import com.lunazstudios.cobblefurnies.registry.CFBlockEntityTypes;
 import com.lunazstudios.cobblefurnies.registry.CFSoundEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -22,6 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class FreezerBlockEntity extends RandomizableContainerBlockEntity {
     private NonNullList<ItemStack> items;
@@ -44,7 +44,7 @@ public class FreezerBlockEntity extends RandomizableContainerBlockEntity {
             protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int count, int openCount) {
             }
 
-            protected boolean isOwnContainer(Player player) {
+            public boolean isOwnContainer(Player player) {
                 if (player.containerMenu instanceof ChestMenu) {
                     Container container = ((ChestMenu) player.containerMenu).getContainer();
                     return container == FreezerBlockEntity.this;
@@ -56,19 +56,19 @@ public class FreezerBlockEntity extends RandomizableContainerBlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(ValueOutput tag) {
+        super.saveAdditional(tag);
         if (!this.trySaveLootTable(tag)) {
-            ContainerHelper.saveAllItems(tag, this.items, registries);
+            ContainerHelper.saveAllItems(tag, this.items);
         }
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void loadAdditional(ValueInput tag) {
+        super.loadAdditional(tag);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         if (!this.tryLoadLootTable(tag)) {
-            ContainerHelper.loadAllItems(tag, this.items, registries);
+            ContainerHelper.loadAllItems(tag, this.items);
         }
     }
 
@@ -98,16 +98,16 @@ public class FreezerBlockEntity extends RandomizableContainerBlockEntity {
     }
 
     @Override
-    public void startOpen(Player player) {
-        if (!this.remove && !player.isSpectator()) {
-            this.openersCounter.incrementOpeners(player, this.getLevel(), this.getBlockPos(), this.getBlockState());
+    public void startOpen(ContainerUser user) {
+        if (!this.remove && !user.getLivingEntity().isSpectator()) {
+            this.openersCounter.incrementOpeners(user.getLivingEntity(), this.getLevel(), this.getBlockPos(), this.getBlockState(), user.getContainerInteractionRange());
         }
     }
 
     @Override
-    public void stopOpen(Player player) {
-        if (!this.remove && !player.isSpectator()) {
-            this.openersCounter.decrementOpeners(player, this.getLevel(), this.getBlockPos(), this.getBlockState());
+    public void stopOpen(ContainerUser user) {
+        if (!this.remove && !user.getLivingEntity().isSpectator()) {
+            this.openersCounter.decrementOpeners(user.getLivingEntity(), this.getLevel(), this.getBlockPos(), this.getBlockState());
         }
     }
 
@@ -128,6 +128,6 @@ public class FreezerBlockEntity extends RandomizableContainerBlockEntity {
         double y = (double) this.worldPosition.getY() + 0.5;
         double z = (double) this.worldPosition.getZ() + 0.5;
 
-        this.level.playSound(null, x, y, z, sound, SoundSource.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.1F + 0.9F);
+        this.level.playSound(null, x, y, z, sound, SoundSource.BLOCKS, 1.0F, this.level.getRandom().nextFloat() * 0.1F + 0.9F);
     }
 }

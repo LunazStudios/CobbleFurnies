@@ -1,8 +1,7 @@
 plugins {
-    id 'dev.architectury.loom' version '1.10-SNAPSHOT' apply false
-    id 'architectury-plugin' version '3.4-SNAPSHOT'
-    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
-    id "org.jetbrains.kotlin.jvm" version "2.2.0"
+    id 'dev.architectury.loom-no-remap' version '1.17-SNAPSHOT' apply false
+    id 'architectury-plugin' version '3.5-SNAPSHOT'
+    id 'com.gradleup.shadow' version '9.4.3' apply false
 }
 
 architectury {
@@ -17,11 +16,11 @@ allprojects {
 tasks.register('buildAllPlatformsRelease', Sync) {
     group = 'build'
     description = 'Builds Fabric and NeoForge release jars into .releases.'
-    dependsOn ':fabric:remapJar', ':neoforge:remapJar'
+    dependsOn ':fabric:shadowJar', ':neoforge:shadowJar'
 
     def releaseDirectory = layout.projectDirectory.dir('.releases')
-    def fabricJar = project(':fabric').tasks.named('remapJar').flatMap { it.archiveFile }
-    def neoForgeJar = project(':neoforge').tasks.named('remapJar').flatMap { it.archiveFile }
+    def fabricJar = project(':fabric').tasks.named('shadowJar').flatMap { it.archiveFile }
+    def neoForgeJar = project(':neoforge').tasks.named('shadowJar').flatMap { it.archiveFile }
 
     into releaseDirectory
     from(fabricJar)
@@ -29,7 +28,7 @@ tasks.register('buildAllPlatformsRelease', Sync) {
 }
 
 subprojects {
-    apply plugin: 'dev.architectury.loom'
+    apply plugin: 'dev.architectury.loom-no-remap'
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 
@@ -55,34 +54,18 @@ subprojects {
                 includeGroup("net.mezzdev.config")
             }
         }
-        maven {
-            url "https://maven.impactdev.net/repository/development/"
-            content { includeGroup("com.cobblemon") }
-        }
         maven{
             url = "https://maven.resourcefulbees.com/repository/maven-public/"
             content { includeGroup("earth.terrarium.athena") }
         }
         maven {
-            name = 'GeckoLib'
-            url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-            content {
-                includeGroup("software.bernie.geckolib")
-            }
-        }
-        maven {
-            url = "https://thedarkcolour.github.io/KotlinForForge/"
-            content { includeGroup("thedarkcolour") }
-        }
-        maven {
-            url "https://maven.shedaniel.me"
+            url = "https://maven.shedaniel.me"
             content { includeGroupByRegex("me[.]shedaniel.*") }
         }
     }
 
     dependencies {
-        minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
-        mappings loom.officialMojangMappings()
+        minecraft "com.mojang:minecraft:$rootProject.minecraft_version"
     }
 
     java {
@@ -91,12 +74,11 @@ subprojects {
         // If you remove this line, sources will not be generated.
         withSourcesJar()
 
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        toolchain.languageVersion = JavaLanguageVersion.of(25)
     }
 
     tasks.withType(JavaCompile).configureEach {
-        it.options.release = 21
+        it.options.release = 25
     }
 
     // Configure Maven publishing.

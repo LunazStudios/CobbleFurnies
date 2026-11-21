@@ -1,18 +1,13 @@
 package com.lunazstudios.cobblefurnies.registry;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import java.util.Collection;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -26,9 +21,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
-import java.util.function.Supplier;
 
 public class CFRegistry {
 
@@ -67,11 +59,6 @@ public class CFRegistry {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
-    public static <T extends Entity> void registerEntityRenderers(Supplier<EntityType<T>> type, EntityRendererProvider<T> renderProvider) {
-        throw new AssertionError();
-    }
-
     @FunctionalInterface
     public interface BlockEntitySupplier<T extends BlockEntity> {
         @NotNull T create(BlockPos var1, BlockState var2);
@@ -84,11 +71,6 @@ public class CFRegistry {
 
     @ExpectPlatform
     public static <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(BlockEntitySupplier<T> blockEntity, Block... validBlocks) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> type, BlockEntityRendererProvider<T> renderProvider) {
         throw new AssertionError();
     }
 

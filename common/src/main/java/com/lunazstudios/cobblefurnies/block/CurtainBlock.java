@@ -4,9 +4,10 @@ import com.lunazstudios.cobblefurnies.block.properties.CFBlockStateProperties;
 import com.lunazstudios.cobblefurnies.block.properties.CurtainHorizontalPart;
 import com.lunazstudios.cobblefurnies.block.properties.CurtainVerticalPart;
 import com.lunazstudios.cobblefurnies.util.block.ShapeUtil;
-import com.mojang.serialization.MapCodec;
+import java.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -14,7 +15,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,8 +31,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
 
 public class CurtainBlock extends HorizontalDirectionalBlock {
 
@@ -83,7 +83,7 @@ public class CurtainBlock extends HorizontalDirectionalBlock {
 
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             CurtainVerticalPart vertical = state.getValue(VERTICAL);
             BlockPos otherPos = vertical == CurtainVerticalPart.TOP ? pos.below() : pos.above();
             BlockState otherState = level.getBlockState(otherPos);
@@ -102,10 +102,6 @@ public class CurtainBlock extends HorizontalDirectionalBlock {
         return state.getValue(OPEN) ? Shapes.empty() : getShape(state, world, pos, context);
     }
 
-    @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
-        return null;
-    }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -140,7 +136,7 @@ public class CurtainBlock extends HorizontalDirectionalBlock {
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
 
         Direction facing = state.getValue(FACING);
         CurtainVerticalPart vertical = state.getValue(VERTICAL);
@@ -171,14 +167,15 @@ public class CurtainBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos,
+                                  Direction dir, BlockPos neighborPos, BlockState neighbor, RandomSource random) {
         if (dir.getAxis().isHorizontal()) {
             return state.setValue(HORIZONTAL, getCurtainHorizontalType(state, level, pos));
         }
         return state;
     }
 
-    private CurtainHorizontalPart getCurtainHorizontalType(BlockState state, LevelAccessor level, BlockPos pos) {
+    private CurtainHorizontalPart getCurtainHorizontalType(BlockState state, LevelReader level, BlockPos pos) {
         Direction facing = state.getValue(FACING);
         Direction left = facing.getCounterClockWise();
         Direction right = facing.getClockWise();
@@ -200,7 +197,7 @@ public class CurtainBlock extends HorizontalDirectionalBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult blockHitResult) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         if (state.getValue(VERTICAL) == CurtainVerticalPart.BOTTOM) {
             toggleCurtain(level, pos.above(), state.getValue(FACING));

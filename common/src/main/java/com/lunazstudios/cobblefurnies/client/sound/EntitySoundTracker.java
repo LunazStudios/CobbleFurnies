@@ -1,7 +1,7 @@
 package com.lunazstudios.cobblefurnies.client.sound;
 
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class EntitySoundTracker {
 
@@ -10,7 +10,7 @@ public final class EntitySoundTracker {
     private EntitySoundTracker() {
     }
 
-    public static boolean isActive(int id, ResourceLocation location) {
+    public static boolean isActive(int id, Identifier location) {
         return INSTANCE.isActive(id, location);
     }
 
@@ -22,7 +22,7 @@ public final class EntitySoundTracker {
         INSTANCE.stop(id, sound);
     }
 
-    public static void stop(int id, ResourceLocation location) {
+    public static void stop(int id, Identifier location) {
         INSTANCE.stop(id, location);
     }
 

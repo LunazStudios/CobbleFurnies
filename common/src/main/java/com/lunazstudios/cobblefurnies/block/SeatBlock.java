@@ -4,7 +4,10 @@ import com.lunazstudios.cobblefurnies.entity.SeatEntity;
 import com.lunazstudios.cobblefurnies.registry.CFBlockTags;
 import com.lunazstudios.cobblefurnies.registry.CFEntityTypeTags;
 import com.lunazstudios.cobblefurnies.registry.CFRegistry;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,9 +20,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-
-import java.util.List;
-import java.util.Optional;
 
 public class SeatBlock extends Block {
     public SeatBlock(Properties properties) {
@@ -55,7 +55,7 @@ public class SeatBlock extends Block {
             return InteractionResult.PASS;
         }
 
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         sitDown(level, pos, getLeashed(player).orElse(player));
         return InteractionResult.SUCCESS;
     }
@@ -79,18 +79,18 @@ public class SeatBlock extends Block {
     public static boolean ejectSeatedExceptPlayer(Level level, SeatEntity seatEntity) {
         List<Entity> passengers = seatEntity.getPassengers();
         if (!passengers.isEmpty() && passengers.get(0) instanceof Player) return false;
-        if (!level.isClientSide) seatEntity.ejectPassengers();
+        if (!level.isClientSide()) seatEntity.ejectPassengers();
         return true;
     }
 
     public static boolean canBePickedUp(Entity passenger) {
         if (passenger instanceof Player) return false;
         if (passenger instanceof TamableAnimal ta && !ta.isTame()) return false;
-        return passenger instanceof LivingEntity && passenger.getType().is(CFEntityTypeTags.CAN_SIT_IN_SEATS);
+        return passenger instanceof LivingEntity && passenger.getType().builtInRegistryHolder().is(CFEntityTypeTags.CAN_SIT_IN_SEATS);
     }
 
     public static void sitDown(Level level, BlockPos pos, Entity entity) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
 
         SeatEntity seat = new SeatEntity(level, pos);
         level.addFreshEntity(seat);
@@ -112,7 +112,7 @@ public class SeatBlock extends Block {
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         return isSeatOccupied(level, pos) ? 15 : 0;
     }
 }

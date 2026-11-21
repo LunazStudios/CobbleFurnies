@@ -3,9 +3,11 @@ package com.lunazstudios.cobblefurnies.block;
 import com.lunazstudios.cobblefurnies.registry.CFBlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -83,9 +85,10 @@ public class TableBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos currentPos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos currentPos,
+                                  Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         if (state.getValue(WATERLOGGED)) {
-            level.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+            ticks.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         return getConnections(state, level, currentPos);
     }
@@ -105,7 +108,7 @@ public class TableBlock extends Block implements SimpleWaterloggedBlock {
         return false;
     }
 
-    public BlockState getConnections(BlockState state, LevelAccessor level, BlockPos pos) {
+    public BlockState getConnections(BlockState state, LevelReader level, BlockPos pos) {
         boolean north = validConnection(level.getBlockState(pos.north()));
         boolean south = validConnection(level.getBlockState(pos.south()));
         boolean east = validConnection(level.getBlockState(pos.east()));

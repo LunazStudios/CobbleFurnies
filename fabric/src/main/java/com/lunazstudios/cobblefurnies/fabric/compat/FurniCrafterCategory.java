@@ -2,6 +2,8 @@ package com.lunazstudios.cobblefurnies.fabric.compat;
 
 import com.lunazstudios.cobblefurnies.CobbleFurnies;
 import com.lunazstudios.cobblefurnies.registry.CFBlocks;
+import java.util.ArrayList;
+import java.util.List;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.Renderer;
@@ -13,13 +15,10 @@ import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.minecraft.resources.Identifier;
 
 public class FurniCrafterCategory implements DisplayCategory<BasicDisplay> {
-    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(
             CobbleFurnies.MOD_ID, "textures/gui/rei/furnicrafter.png");
     public static final CategoryIdentifier<FurniCrafterDisplay> FURNICRAFTER =
             CategoryIdentifier.of(CobbleFurnies.MOD_ID, "furnicrafter");
