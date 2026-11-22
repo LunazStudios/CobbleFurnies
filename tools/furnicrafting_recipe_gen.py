@@ -85,7 +85,7 @@ def get_wood_table_recipe(wood):
         }
     }
 
-def get_colored_chair_recipe(color):
+def get_dark_chair_recipe(color):
     return {
         "type": "cobblefurnies:furni_crafting",
         "materials": [
@@ -99,12 +99,12 @@ def get_colored_chair_recipe(color):
             }
         ],
         "result": {
-            "id": f"cobblefurnies:{color}_chair",
+            "id": f"cobblefurnies:{color}_dark_chair",
             "count": 1
         }
     }
 
-def get_colored_stool_recipe(color):
+def get_dark_stool_recipe(color):
     return {
         "type": "cobblefurnies:furni_crafting",
         "materials": [
@@ -118,7 +118,7 @@ def get_colored_stool_recipe(color):
             }
         ],
         "result": {
-            "id": f"cobblefurnies:{color}_stool",
+            "id": f"cobblefurnies:{color}_dark_stool",
             "count": 2
         }
     }
@@ -395,10 +395,10 @@ def generate_recipes():
         #save_json_file(poke_wool_path, get_poke_wool_recipe(color))
         
         #colored_chair_path = os.path.join(base_dir, f"{color}_dark_chair.json")
-        #save_json_file(colored_chair_path, get_colored_chair_recipe(color))
+        #save_json_file(colored_chair_path, get_dark_chair_recipe(color))
 
         #colored_stool_path = os.path.join(base_dir, f"{color}_dark_stool.json")
-        #save_json_file(colored_stool_path, get_colored_stool_recipe(color))
+        #save_json_file(colored_stool_path, get_dark_stool_recipe(color))
 
         #sofa_path = os.path.join(base_dir, f"{color}_sofa.json")
         #save_json_file(sofa_path, get_sofa_recipe(color))
